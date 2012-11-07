@@ -1,0 +1,44 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="21dp"
+        android:gravity="right" >
+
+            <TextView
+                android:id="@+id/textViewGeolocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="5sp"
+                android:text="Connexion error!>"
+                android:textSize="4pt" />
+
+            <Button
+                android:id="@+id/btSettings"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="28dp"
+                android:layout_height="22dp"
+                android:background="@drawable/ic_menu_preferences" />
+            
+            <Button
+                android:id="@+id/btTest"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="28dp"
+                android:layout_height="22dp"
+                android:background="@drawable/ic_menu_mylocation" />
+          
+    </LinearLayout>
+
+    <org.osmdroid.views.MapView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/openmapview"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_gravity="bottom"
+        android:clickable="true" />
+
+</LinearLayout>
