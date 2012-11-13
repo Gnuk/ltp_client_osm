@@ -3,42 +3,53 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical" >
+	
+    <!-- Barre des menus -->
 
     <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="21dp"
+        android:layout_height="22dp"
         android:gravity="right" >
 
-            <TextView
-                android:id="@+id/textViewGeolocation"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="5sp"
-                android:text="Connexion error!>"
-                android:textSize="4pt" />
+        <Button
+            android:id="@+id/buttonMyAccount"
+            android:background="@drawable/ltp_icon_min"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="28dp"
+            android:layout_height="22dp"
+            android:text="" />
 
-            <Button
-                android:id="@+id/btSettings"
-                style="?android:attr/buttonStyleSmall"
-                android:layout_width="28dp"
-                android:layout_height="22dp"
-                android:background="@drawable/ic_menu_preferences" />
-            
-            <Button
-                android:id="@+id/btTest"
-                style="?android:attr/buttonStyleSmall"
-                android:layout_width="28dp"
-                android:layout_height="22dp"
-                android:background="@drawable/ic_menu_mylocation" />
-          
+        <TextView
+            android:id="@+id/textViewGeolocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="5sp"
+            android:layout_weight="0.34"
+            android:paddingLeft="5pt"
+            android:text="Connexion error!>"
+            android:textSize="4pt" />
+
+        <Button
+            android:id="@+id/btSettings"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="28dp"
+            android:layout_height="22dp"
+            android:background="@drawable/ic_menu_preferences" />
+
+        <Button
+            android:id="@+id/btTest"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="28dp"
+            android:layout_height="22dp"
+            android:background="@drawable/ic_menu_mylocation" />
     </LinearLayout>
-
+    
     <org.osmdroid.views.MapView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/openmapview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_gravity="bottom"
+        android:layout_gravity="fill"
         android:clickable="true" />
 
 </LinearLayout>

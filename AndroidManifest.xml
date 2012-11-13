@@ -30,8 +30,9 @@
         </activity>
         
         <activity android:name=".SettingsActivity"></activity>
+        <activity android:name=".LoginActivity"></activity>
         
-         <service android:name=".LtpTrackerService" />
+    	<service android:name=".LtpTrackerService" />
     </application>
 
 </manifest>
