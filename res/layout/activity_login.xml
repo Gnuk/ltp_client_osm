@@ -23,8 +23,8 @@
                 
                             <TextView
                 android:id="@+id/textViewConnexion"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
                 android:layout_weight="0.92"
                 android:paddingLeft="10pt"
                 android:paddingTop="5pt"
@@ -47,7 +47,7 @@
         <LinearLayout
           xmlns:android="http://schemas.android.com/apk/res/android"
           android:orientation="vertical"
-          android:layout_width="match_parent"
+          android:layout_width="fill_parent"
           android:layout_height="wrap_content"
           android:padding="10dip"
           android:layout_below="@id/header">

@@ -9,7 +9,7 @@
 
     <TextView
         android:id="@+id/textView1"
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:padding="2pt"
         android:text="Que voulez vous faire ?"
@@ -18,7 +18,7 @@
         android:textSize="5pt" />
 
     <TableLayout
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
 
         <TableRow
@@ -28,7 +28,7 @@
 
             <Button
                 android:id="@+id/buttonCreateAccount"
-                android:layout_width="match_parent"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.84"
                 android:text="S&apos;inscrire" />
@@ -43,7 +43,7 @@
 
             <Button
                 android:id="@+id/buttonConnexion"
-                android:layout_width="match_parent"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.84"
                 android:text="Se connecter" />

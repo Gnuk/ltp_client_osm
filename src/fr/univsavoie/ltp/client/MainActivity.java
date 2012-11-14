@@ -53,10 +53,15 @@ import org.osmdroid.views.overlay.ItemizedOverlayWithFocus;
 import org.osmdroid.views.overlay.MinimapOverlay;
 import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.ScaleBarOverlay;
+import org.osmdroid.views.overlay.SimpleLocationOverlay;
 
+import fr.univsavoie.ltp.client.tools.SharedVariables;
 import fr.univsavoie.ltp.client.tools.SimpleSSLSocketFactory;
 
+import android.R.bool;
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -69,10 +74,14 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -92,6 +101,7 @@ public class MainActivity extends Activity
 	Point p;
 	
 	/* Global variables */
+	private SimpleLocationOverlay mMyLocationOverlay;
 	private static MapView myOpenMapView;
 	private MapController myMapController;
 	private LocationManager locationManager;
@@ -104,6 +114,9 @@ public class MainActivity extends Activity
 	private HttpGet httpGet;
 	private ResponseHandler<String> responseHandler;
 	
+	private int STATIC_INTEGER_VALUE = 0;
+
+	
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState)  
@@ -111,9 +124,16 @@ public class MainActivity extends Activity
     	super.onCreate(savedInstanceState);
     	
     	// Création de l'activité principale
-        setContentView(R.layout.activity_main);    
+        setContentView(R.layout.activity_main);   
+        
+		// Instance de SharedPreferences pour lire les données dans un fichier
+		SharedPreferences myPrefs = this.getSharedPreferences("UserPrefs", MODE_WORLD_READABLE); 
+		String login = myPrefs.getString("Email", null);
+		
+		boolean displayAuthBox = SharedVariables.displayAuthbox;
      
-        try {
+        try 
+        {
 			// Ecouteur d'évènement sur le bouton des paramètres
 			Button btSettings = (Button) findViewById(R.id.btSettings);
 			btSettings.setOnClickListener(new View.OnClickListener() 
@@ -145,7 +165,8 @@ public class MainActivity extends Activity
 			});
 			
 			Button btn_show = (Button) findViewById(R.id.buttonMyAccount);
-			btn_show.setOnClickListener(new OnClickListener() {
+			btn_show.setOnClickListener(new OnClickListener() 
+			{
 			  @Override
 			  public void onClick(View arg0) {
 
@@ -155,18 +176,12 @@ public class MainActivity extends Activity
 			  }
 			});
 			
-			// Ecouteur d'évènement sur le bouton de connexion
-			/*final EditText champID = (EditText) findViewById(R.id.champId);
-			final EditText champMDP = (EditText) findViewById(R.id.champMDP);
-			Button boutonConnexion = (Button) findViewById(R.id.boutonConnexion);
-			boutonConnexion.setOnClickListener(new View.OnClickListener()
-			{
-				public void onClick(View v)
-				{
-					System.out.println(champID.getText());
-					System.out.println(champMDP.getText());
-				}
-			});*/
+			/**
+			 * Afficher la popup qui propose a l'invité de se connecter
+			 * ou de s'inscrire auprès du service LTP.
+			 */
+			if (displayAuthBox && login == null)
+				showAuthBox();
 			
 			// MapView settings
 			myOpenMapView = (MapView)findViewById(R.id.openmapview);
@@ -177,6 +192,9 @@ public class MainActivity extends Activity
 			// MapController settings
 			myMapController = myOpenMapView.getController();
 			myMapController.setZoom(6);
+			
+			mMyLocationOverlay = new SimpleLocationOverlay(this);                          
+            myOpenMapView.getOverlays().add(mMyLocationOverlay);
 			  
 			// Create map Overlay
 			overlayItemArray = new ArrayList<OverlayItem>();
@@ -216,20 +234,16 @@ public class MainActivity extends Activity
 			//Add Scale Bar
 			ScaleBarOverlay myScaleBarOverlay = new ScaleBarOverlay(this);
 			myOpenMapView.getOverlays().add(myScaleBarOverlay);
-			
-			// Obtenir les préférences partagées
-			//SharedPreferences prefs = getPreferences(MODE_PRIVATE); 
-			//String login = prefs.getString("USER_EMAIL", null);
-			//String password = prefs.getString("USER_PASSWORD", null);
 
-			//if (login != null)
-			//{
+			// Connecter l'utilisateur et parser ses amis
+			if (login != null)
+			{
 				// Appeler la fonction pour s'authentifier auprès du service LTP
-				//auth();
+				auth();
 				
 				// Appeler la fonction pour parser les amis et les affichés sur la carte
-				//parseFriends();
-			//}
+				parseFriends();
+			}
 
 			// Call for update user gps coordinates
 			updateUserInterface(lastLocation);
@@ -238,15 +252,7 @@ public class MainActivity extends Activity
 			/*ArrayList<OverlayItem> anotherOverlayItemArray;
 			anotherOverlayItemArray = new ArrayList<OverlayItem>();
 			anotherOverlayItemArray.add(new OverlayItem("0, 0", "0, 0", new GeoPoint(0, 0)));
-			anotherOverlayItemArray.add(new OverlayItem("Chuck Norris", "Alors, on va boire une bierre ?", new GeoPoint(38.883333, -77.016667)));
-			anotherOverlayItemArray.add(new OverlayItem("Le Pape", "Le vatican est ouvert! !", new GeoPoint(39.916667, 116.383333)));
-			anotherOverlayItemArray.add(new OverlayItem("Roger", "Un pote par ici?", new GeoPoint(51.5, -0.116667)));
-			anotherOverlayItemArray.add(new OverlayItem("Marie", "Je mange des pates :D", new GeoPoint(52.516667, 13.383333)));
-			anotherOverlayItemArray.add(new OverlayItem("Giu", "Italien chaud pour une soirée", new GeoPoint(38.316667, 127.233333)));
-			anotherOverlayItemArray.add(new OverlayItem("Mario", "Luigi, je suis la!", new GeoPoint(28.613333, 77.208333)));
-			anotherOverlayItemArray.add(new OverlayItem("Kevin", "Trolololol", new GeoPoint(55.75, 37.616667)));
-			anotherOverlayItemArray.add(new OverlayItem("Alice", "Mais ou est bob ?", new GeoPoint(48.856667, 2.350833)));
-			anotherOverlayItemArray.add(new OverlayItem("Bob", "Mais ou est alice ?", new GeoPoint(45.4, -75.666667)));*/
+			anotherOverlayItemArray.add(new OverlayItem("Chuck Norris", "Alors, on va boire une bierre ?", new GeoPoint(38.883333, -77.016667)));*/
 		} 
         catch (Exception e) 
         {
@@ -269,6 +275,8 @@ public class MainActivity extends Activity
 
 			JSONObject potes = new JSONObject(response);			
 			JSONArray potesArray = potes.getJSONObject("gpx").getJSONArray("wpt");
+			
+			Log.i("Watch", "Passage par: parseFriends()");
 
 			// Parse user frinds list into OverlayItem arraylist
 	        for (int i = 0 ; (i < potesArray.length()) ; i++ )
@@ -277,16 +285,24 @@ public class MainActivity extends Activity
 	        	JSONObject pote = potesArray.getJSONObject(i);
 	        	
 		        // Prepare array of users icons in map
-		        anotherOverlayItemArray.add(new OverlayItem(pote.getString("name"), "status", new GeoPoint(pote.getDouble("@lat"), pote.getDouble("@lon"))));
+		        anotherOverlayItemArray.add(new OverlayItem(pote.getString("name"), pote.getString("desc"), new GeoPoint(pote.getDouble("@lat"), pote.getDouble("@lon"))));
 	        }
 	        
             // Create a new ItemizedOverlayWithFocus with our user item array
             ItemizedOverlayWithFocus<OverlayItem> anotherItemizedIconOverlay = new ItemizedOverlayWithFocus<OverlayItem>(this, anotherOverlayItemArray, myOnItemGestureListener);
-            myOpenMapView.getOverlays().add(anotherItemizedIconOverlay);   
+            myOpenMapView.getOverlays().add(anotherItemizedIconOverlay);
+            myOpenMapView.refreshDrawableState();
+            myOpenMapView.postInvalidate();
             
             // Setup icon overlay
             anotherItemizedIconOverlay.setFocusItemsOnTap(true);
-            anotherItemizedIconOverlay.setFocusedItem(0);   
+            anotherItemizedIconOverlay.setFocusedItem(0);  
+            
+            runOnUiThread(new Runnable() {
+            	 public void run() {            
+            		 myOpenMapView.postInvalidate();
+            	  }
+            	});
         } 
         catch (ClientProtocolException e) 
         {
@@ -311,15 +327,15 @@ public class MainActivity extends Activity
      */
     public void auth() 
 	{
-		try 
+		try
 		{
-			// Obtenir les préférences partagées
-			SharedPreferences prefs = getPreferences(MODE_PRIVATE); 
-			String login = prefs.getString("USER_EMAIL", null);
-			String password = prefs.getString("USER_PASSWORD", null);
+			// Instance de SharedPreferences pour lire les données dans un fichier
+			SharedPreferences myPrefs = this.getSharedPreferences("UserPrefs", MODE_WORLD_READABLE); 
+			String login = myPrefs.getString("Email", null);
+			String password = myPrefs.getString("Password", null);
 			
-			Log.i("Watch", "Login : " + login);
-			Log.i("Watch", "Mot de passe : " + password);
+			Log.i("Watch", "login : " + login);
+			Log.i("Watch", "password : " + password);
 			
 			HttpRequestInterceptor preemptiveAuth = new HttpRequestInterceptor() 
 			{
@@ -356,7 +372,7 @@ public class MainActivity extends Activity
 			// Register the HTTP and HTTPS Protocols. For HTTPS, register our
 			// custom SSL Factory object.
 			SchemeRegistry registry = new SchemeRegistry();
-			registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+			//registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
 			registry.register(new Scheme("https", sslFactory, 443));
 
 			// Create a new connection manager using the newly created registry
@@ -375,7 +391,7 @@ public class MainActivity extends Activity
 
 			//httpGet = new HttpGet("http://jibiki.univ-savoie.fr/teapot/api/localisations/carron/friendships?format=json");
 			httpGet = new HttpGet("https://jibiki.univ-savoie.fr/ltpdev/?p=json");
-			//HttpGet httpGet = new HttpGet(url+"/api/localisations/"+login+"/friendships?format=json");
+			//httpGet = new HttpGet("http://jibiki.univ-savoie.fr/ltp/api/localisations/"+login+"/friendships?format=json");
 			responseHandler = new BasicResponseHandler();
 		} 
 		catch (KeyManagementException e1) 
@@ -430,7 +446,11 @@ public class MainActivity extends Activity
 		super.onPause();
 		locationManager.removeUpdates(myLocationListener);
 	}
-
+	
+	/**
+	 * Mise a jours des coordonnées géographique de l'utilisateur
+	 * @param loc
+	 */
 	private void updateLoc(Location loc)
 	{
         try 
@@ -505,6 +525,9 @@ public class MainActivity extends Activity
 		}
     };
     
+    /**
+     * Classe qui gère l'affichage de la localisation GPS sur la MapView
+     */
     private class MyItemizedIconOverlay extends ItemizedIconOverlay<OverlayItem>
     {
 		public MyItemizedIconOverlay(
@@ -527,8 +550,7 @@ public class MainActivity extends Activity
 				Point out = new Point();
 				mapview.getProjection().toPixels(in, out);
 				
-				Bitmap bm = BitmapFactory.decodeResource(getResources(), 
-						R.drawable.ic_menu_mylocation);
+				Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.ic_menu_mylocation);
 				canvas.drawBitmap(bm, 
 						out.x - bm.getWidth()/2, 	//shift the bitmap center
 						out.y - bm.getHeight()/2, 	//shift the bitmap center
@@ -539,32 +561,82 @@ public class MainActivity extends Activity
 		@Override
 		public boolean onSingleTapUp(MotionEvent event, MapView mapView) 
 		{
-			//return super.onSingleTapUp(event, mapView);
-			return true;
+			return super.onSingleTapUp(event, mapView);
+			//return true;
 		}
     }
     
-	// Get the x and y position after the button is draw on screen
-	// (It's important to note that we can't get the position in the onCreate(),
-	// because at that stage most probably the view isn't drawn yet, so it will
-	// return (0, 0))
-	@Override
-	public void onWindowFocusChanged(boolean hasFocus) 
-	{
+    /**
+     * Afficher une boite au milieu de la carte si aucun utilisateur est connectés
+     * pour proposer a l'invité, de se connecter ou s'incrire aupres du service LTP.
+     */
+    private void showAuthBox()
+    {
+		DisplayMetrics dm = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(dm);
 
-		int[] location = new int[2];
-		Button button = (Button) findViewById(R.id.buttonMyAccount);
+		final int height = dm.heightPixels;
+		final int width = dm.widthPixels;
+		
+		int popupWidth = width / 2;
+		int popupHeight = height / 2;
+		
+		// Inflate the popup_layout.xml
+		LinearLayout viewGroup = (LinearLayout) this.findViewById(R.id.popup);
+		LayoutInflater layoutInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		
+		final View layout = layoutInflater.inflate(R.layout.popup_account_layout,viewGroup);		
+		layout.setBackgroundResource(R.drawable.popup_gradient);
 
-		// Get the x, y location and store it in the location[] array
-		// location[0] = x, location[1] = y.
-		if (button != null)
-			button.getLocationOnScreen(location);
+		// Creating the PopupWindow
+		final PopupWindow popup = new PopupWindow(this);
+		popup.setContentView(layout);
+		popup.setWidth(popupWidth);
+		popup.setHeight(popupHeight);
+		popup.setFocusable(true);
 
-		// Initialize the Point with x, and y positions
-		p = new Point();
-		p.x = location[0];
-		p.y = location[1];
-	}
+		// Some offset to align the popup a bit to the right, and a bit down,
+		// relative to button's position.
+		final int OFFSET_X = popupWidth / 2;
+		final int OFFSET_Y = popupHeight / 2;
+		
+		// Clear the default translucent background
+		popup.setBackgroundDrawable(new BitmapDrawable());
+		
+		// Displaying the popup at the specified location, + offsets.
+		findViewById(R.id.layoutMain).post(new Runnable() {
+			@Override
+			public void run() {
+				popup.showAtLocation(layout, Gravity.NO_GRAVITY, OFFSET_X, OFFSET_Y);
+			}
+		});
+		
+        // Ecouteur d'évènement sur le bouton des paramètres
+        Button btLogin = (Button) layout.findViewById(R.id.buttonConnexion);
+        btLogin.setOnClickListener(new OnClickListener() 
+        {
+        	@Override
+            public void onClick(View view) 
+            {
+        		//Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        		//startActivity(intent);
+        		SharedVariables.displayAuthbox = false;
+        		
+        		Intent i = new Intent(MainActivity.this, LoginActivity.class);    
+        		startActivityForResult(i, STATIC_INTEGER_VALUE);
+            }
+        });
+
+		// Getting a reference to Close button, and close the popup when clicked.
+		Button close = (Button) layout.findViewById(R.id.close);
+		close.setOnClickListener(new OnClickListener() 
+		{
+			@Override
+			public void onClick(View v) {
+				popup.dismiss();
+			}
+		});
+    }
  
  	/**
  	 * Afficher une popup
@@ -614,21 +686,64 @@ public class MainActivity extends Activity
         	@Override
             public void onClick(View view) 
             {
-        		Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-        		startActivity(intent);
+        		//Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        		//startActivity(intent);
+        		
+        		Intent i = new Intent(MainActivity.this, LoginActivity.class);    
+        		startActivityForResult(i, STATIC_INTEGER_VALUE);
             }
         });
 
-		// Getting a reference to Close button, and close the popup when
-		// clicked.
+		// Getting a reference to Close button, and close the popup when clicked.
 		Button close = (Button) layout.findViewById(R.id.close);
-		close.setOnClickListener(new OnClickListener() {
-
+		close.setOnClickListener(new OnClickListener() 
+		{
 			@Override
 			public void onClick(View v) {
 				popup.dismiss();
 			}
 		});
+	}
+
+	/**
+	 * Méthode qui se déclenchera lorsque vous appuierez sur le bouton menu du téléphone
+	 */
+    public boolean onCreateOptionsMenu(Menu menu) 
+    {
+        // Création d'un MenuInflater qui va permettre d'instancier un Menu XML en un objet Menu
+        MenuInflater inflater = getMenuInflater();
+        
+        // Instanciation du menu XML spécifier en un objet Menu
+        inflater.inflate(R.menu.activity_main, menu);
+        
+        return true;
+     }
+    
+    /**
+     * Méthode qui se déclenchera au clic sur un item
+     */
+	public boolean onOptionsItemSelected(MenuItem item) 
+	{
+		// On regarde quel item a été cliqué grâce à son id et on déclenche une action
+		switch (item.getItemId()) 
+		{
+		case R.id.logout:
+	        // Instance de SharedPreferences pour enregistrer des données dans un fichier
+	        SharedPreferences myPrefs = getSharedPreferences("UserPrefs", MODE_WORLD_READABLE); // Ici on permet donc la lecture de notre fichier de préférence à toutes les applications
+	        SharedPreferences.Editor prefsEditor = myPrefs.edit(); // Instance de l'editeur permettant d'écrire dans le fichier
+	        prefsEditor.putString("Email", null); // Données
+	        prefsEditor.putString("Password", null); // Données
+	        prefsEditor.commit(); // Valider les modifications
+	        
+	        // Redémarrer l'activité pour prendre en compte les modifications
+	        resetActivity();
+	        
+			return true;
+		case R.id.exit:
+			finish();
+			return true;
+		}
+		return false;
 	}
     
 	/**
@@ -641,5 +756,46 @@ public class MainActivity extends Activity
 			myOpenMapView.getOverlays().add(miniMapOverlay);
 		else
 			myOpenMapView.getOverlays().remove(miniMapOverlay);
+	}
+	
+	public void resetActivity()
+	{
+		Intent intent = getIntent();
+		finish();
+		startActivity(intent);
+	}
+	
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) 
+	{
+		super.onActivityResult(requestCode, resultCode, data);
+		if (resultCode == Activity.RESULT_OK) 
+		{
+			// On relance l'activité car on doit rafraichir la map !
+			finish();
+			startActivity(getIntent());
+		}
+	}
+	
+	// Get the x and y position after the button is draw on screen
+	// (It's important to note that we can't get the position in the onCreate(),
+	// because at that stage most probably the view isn't drawn yet, so it will
+	// return (0, 0))
+	@Override
+	public void onWindowFocusChanged(boolean hasFocus) 
+	{
+
+		int[] location = new int[2];
+		Button button = (Button) findViewById(R.id.buttonMyAccount);
+
+		// Get the x, y location and store it in the location[] array
+		// location[0] = x, location[1] = y.
+		if (button != null)
+			button.getLocationOnScreen(location);
+
+		// Initialize the Point with x, and y positions
+		p = new Point();
+		p.x = location[0];
+		p.y = location[1];
 	}
 }
