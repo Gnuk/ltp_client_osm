@@ -22,11 +22,12 @@ Enfin, il faut instancier un AVD, cette a dire, l'émulateur. Cela se passe par l
 Si tout est bon, il ne reste plus qu'à lancer l'émulateur !
 
 
-================
+
 Problèmes connus
-================
+----------------
 
 > Impossible d'afficher la carte, les marqueurs…
+
 Un possible problème de connexion entre l'émulateur et le réseau.
   
 Dans l'onglet target (quand vous cliquez sur la petite flèche au moment où vous lancez l'application), ajoutez la ligne: -dns-server VOTRE_IP_DNS
