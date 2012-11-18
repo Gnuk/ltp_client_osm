@@ -1,6 +1,8 @@
 package fr.univsavoie.ltp.client;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -73,7 +75,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.StrictMode;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -326,7 +327,6 @@ public class MainActivity extends Activity
     /**
      * Fonction pour parser sur la carte, les amis de l'utilisateur connecté
      */
-    @SuppressLint("NewApi")
 	public void parseFriends()
     {
     	String response = null;
@@ -335,15 +335,44 @@ public class MainActivity extends Activity
         
         try 
         {
-			if (android.os.Build.VERSION.RELEASE.startsWith("2.3") || android.os.Build.VERSION.RELEASE.startsWith("3.") || 
-					android.os.Build.VERSION.RELEASE.startsWith("4.")) 
+        	// FIX POUR EVITER QUE L'APPLI PLANTE SUR DES VERSION ANDROID AU SDK > 8
+        	// Ce code remplace le StrictMode qui est pas dispo dans les versions d'android < 2.3...
+        	// mais c'est pas terrible, ca peux ne pas fonctionner d'une config a une autre !
+        	int SDK_INT = android.os.Build.VERSION.SDK_INT;
+			if (SDK_INT>8) 
 			{
-				StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-				StrictMode.setThreadPolicy(policy);
-				
-				Log.i("Watch", "StrictMode");
-			}
+				try 
+				{
+			        Class<?> strictModeClass = Class.forName("android.os.StrictMode", true, Thread.currentThread()
+			                .getContextClassLoader());
 
+			        Class<?> threadPolicyClass = Class.forName("android.os.StrictMode$ThreadPolicy", true, Thread
+			                .currentThread().getContextClassLoader());
+
+			        Class<?> threadPolicyBuilderClass = Class.forName("android.os.StrictMode$ThreadPolicy$Builder", true,
+			                Thread.currentThread().getContextClassLoader());
+
+			        Method setThreadPolicyMethod = strictModeClass.getMethod("setThreadPolicy", threadPolicyClass);
+
+			        Method detectAllMethod = threadPolicyBuilderClass.getMethod("detectAll");
+			        Method penaltyMethod = threadPolicyBuilderClass.getMethod("penaltyLog");
+			        Method buildMethod = threadPolicyBuilderClass.getMethod("build");
+
+			        Constructor<?> threadPolicyBuilderConstructor = threadPolicyBuilderClass.getConstructor();
+			        Object threadPolicyBuilderObject = threadPolicyBuilderConstructor.newInstance();
+
+			        Object obj = detectAllMethod.invoke(threadPolicyBuilderObject);
+
+			        obj = penaltyMethod.invoke(obj);
+			        Object threadPolicyObject = buildMethod.invoke(obj);
+			        setThreadPolicyMethod.invoke(strictModeClass, threadPolicyObject);
+
+			    } 
+				catch (Exception ex) 
+				{
+			        
+			    }
+			}
         	
         	response = httpClient.execute(httpGet, responseHandler);
 
