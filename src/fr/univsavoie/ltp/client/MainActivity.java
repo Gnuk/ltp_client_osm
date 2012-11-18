@@ -23,7 +23,6 @@ import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
@@ -58,10 +57,9 @@ import org.osmdroid.views.overlay.SimpleLocationOverlay;
 import fr.univsavoie.ltp.client.tools.SharedVariables;
 import fr.univsavoie.ltp.client.tools.SimpleSSLSocketFactory;
 
-import android.R.bool;
+import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningTaskInfo;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -75,6 +73,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.StrictMode;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -85,6 +84,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
@@ -92,96 +92,70 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 /**
- * MainActivity l'activité principale
- * de l'application Android
+ * MainActivity l'activité principale de l'application Android
  */
 public class MainActivity extends Activity 
 {
-	//The "x" and "y" position of the "Show Button" on screen.
-	Point p;
+	/* --------------------------------
+	 * Variables globales de l'activité
+	 * --------------------------------
+	 */
 	
-	/* Global variables */
+	/* Variables de OSMDroid */
 	private SimpleLocationOverlay mMyLocationOverlay;
-	private static MapView myOpenMapView;
+	private MapView myOpenMapView;
 	private MapController myMapController;
 	private LocationManager locationManager;
 	private Location lastLocation;
 	private ArrayList<OverlayItem> overlayItemArray;
-	private static MinimapOverlay miniMapOverlay;
-	private boolean estAfficherMiniCarte = true;
+	private MinimapOverlay miniMapOverlay;
 	
+	/* Variables du service HTTP / Apache */
 	private DefaultHttpClient httpClient;
 	private HttpGet httpGet;
 	private ResponseHandler<String> responseHandler;
 	
+	/* Variables de gestion */
+	private boolean displayAuthBox, displayMiniMap;
+	private String login;
 	private int STATIC_INTEGER_VALUE = 0;
-
+	private BroadcastReceiver myMessageReceiver;
+	private Point p;
 	
-    /** Called when the activity is first created. */
+	private PopupWindow popupUserInfos;
+	
+	
+    /* --------------------------------------------------------
+     * Evenements de l'activity (onCreate, onResume, onStop...)
+     * --------------------------------------------------------
+     */
+	
+	/** Appelé quand l'activité est crée */
     @Override
     public void onCreate(Bundle savedInstanceState)  
     {
     	super.onCreate(savedInstanceState);
     	
     	// Création de l'activité principale
-        setContentView(R.layout.activity_main);   
+        setContentView(R.layout.activity_main);  
+        
+        // L'utilisateur est t'il deja connecté ?
+        displayAuthBox = SharedVariables.displayAuthbox;
         
 		// Instance de SharedPreferences pour lire les données dans un fichier
 		SharedPreferences myPrefs = this.getSharedPreferences("UserPrefs", MODE_WORLD_READABLE); 
-		String login = myPrefs.getString("Email", null);
-		
-		boolean displayAuthBox = SharedVariables.displayAuthbox;
-     
+		login = myPrefs.getString("Email", null);
+		displayMiniMap = myPrefs.getBoolean("DisplayMinimap", false);
+        
         try 
         {
-			// Ecouteur d'évènement sur le bouton des paramètres
-			Button btSettings = (Button) findViewById(R.id.btSettings);
-			btSettings.setOnClickListener(new View.OnClickListener() 
-			{
-			    public void onClick(View view) 
-			    {
-			        Intent myIntent = new Intent(view.getContext(), LoginActivity.class);
-			        startActivityForResult(myIntent, 0);
-			    }
-			});
-			
-			// Ecouteur d'évènement sur le bouton d'affichage de la mini-carte
-			Button btTest = (Button) findViewById(R.id.btTest);
-			btTest.setOnClickListener(new View.OnClickListener() 
-			{
-			    public void onClick(View view) 
-			    {
-			    	if(estAfficherMiniCarte)
-			    	{
-			    		estAfficherMiniCarte = false;
-			    		enableMinimap(estAfficherMiniCarte);
-			    	}
-			    	else
-			    	{
-			    		estAfficherMiniCarte = true;
-			    		enableMinimap(estAfficherMiniCarte);
-			    	}
-			    }
-			});
-			
-			Button btn_show = (Button) findViewById(R.id.buttonMyAccount);
-			btn_show.setOnClickListener(new OnClickListener() 
-			{
-			  @Override
-			  public void onClick(View arg0) {
-
-			    //Open popup window
-			    if (p != null)
-			    showPopup(MainActivity.this, p);
-			  }
-			});
-			
-			/**
-			 * Afficher la popup qui propose a l'invité de se connecter
-			 * ou de s'inscrire auprès du service LTP.
-			 */
-			if (displayAuthBox && login == null)
-				showAuthBox();
+        	if (displayAuthBox)
+        	{
+    			if (login == null)
+    				displayGuestPopup();
+    			else
+    				displayUserPopup();
+        	}
 			
 			// MapView settings
 			myOpenMapView = (MapView)findViewById(R.id.openmapview);
@@ -201,15 +175,6 @@ public class MainActivity extends Activity
 			DefaultResourceProxyImpl defaultResourceProxyImpl = new DefaultResourceProxyImpl(this);
 			MyItemizedIconOverlay myItemizedIconOverlay = new MyItemizedIconOverlay(overlayItemArray, null, defaultResourceProxyImpl);
 			myOpenMapView.getOverlays().add(myItemizedIconOverlay);
-			
-			// Create a minimap overlay
-			//WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-			//Display display = wm.getDefaultDisplay();
-			//miniMapOverlay = new MinimapOverlay(this, myOpenMapView.getTileRequestCompleteHandler());
-			//miniMapOverlay.setZoomDifference(5);
-			//miniMapOverlay.setHeight(100);
-			//miniMapOverlay.setWidth(100);
-			//myOpenMapView.getOverlays().add(miniMapOverlay);
 
 			// Trace user thanks to GPS or Network Provider or Passive Provider (with chance, on of them must work !)
 			locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
@@ -231,10 +196,9 @@ public class MainActivity extends Activity
 				myMapController.setCenter(point2);
 			}        
 			
-			//Add Scale Bar
-			ScaleBarOverlay myScaleBarOverlay = new ScaleBarOverlay(this);
-			myOpenMapView.getOverlays().add(myScaleBarOverlay);
-
+			// Call for update user gps coordinates
+			updateUserInterface(lastLocation);
+			
 			// Connecter l'utilisateur et parser ses amis
 			if (login != null)
 			{
@@ -244,15 +208,55 @@ public class MainActivity extends Activity
 				// Appeler la fonction pour parser les amis et les affichés sur la carte
 				parseFriends();
 			}
-
-			// Call for update user gps coordinates
-			updateUserInterface(lastLocation);
+			
+			//Add Scale Bar
+			ScaleBarOverlay myScaleBarOverlay = new ScaleBarOverlay(this);
+			myOpenMapView.getOverlays().add(myScaleBarOverlay);
+			
+			// Create a minimap overlay
+			miniMapOverlay = new MinimapOverlay(this, myOpenMapView.getTileRequestCompleteHandler());
+			miniMapOverlay.setZoomDifference(10);
+			miniMapOverlay.setHeight(100);
+			miniMapOverlay.setWidth(100);
+			if (displayMiniMap) // Selon les paramètres utilisateur, afficher ou pas la minimap
+				myOpenMapView.getOverlays().add(miniMapOverlay);
+			else
+				if (myOpenMapView.getOverlays().contains(miniMapOverlay))
+					myOpenMapView.getOverlays().remove(miniMapOverlay);
 			      
 			// Prepare array of users icons in map
 			/*ArrayList<OverlayItem> anotherOverlayItemArray;
 			anotherOverlayItemArray = new ArrayList<OverlayItem>();
 			anotherOverlayItemArray.add(new OverlayItem("0, 0", "0, 0", new GeoPoint(0, 0)));
 			anotherOverlayItemArray.add(new OverlayItem("Chuck Norris", "Alors, on va boire une bierre ?", new GeoPoint(38.883333, -77.016667)));*/
+			
+			/*
+			 * Evenements sur composants
+			 */
+			
+			// Ecouteur d'évènement sur le bouton des paramètres
+			Button btSettings = (Button) findViewById(R.id.btSettings);
+			btSettings.setOnClickListener(new View.OnClickListener() 
+			{
+			    public void onClick(View view) 
+			    {
+			        Intent myIntent = new Intent(view.getContext(), LoginActivity.class);
+			        startActivityForResult(myIntent, 0);
+			    }
+			});
+			
+			// Ecouteur d'évènement sur le bouton des paramètres
+			Button btAccount = (Button) findViewById(R.id.buttonMyAccount);
+			btAccount.setOnClickListener(new View.OnClickListener() 
+			{
+			    public void onClick(View view) 
+			    {
+					if (login == null)
+						displayGuestPopup();
+					else
+						displayUserPopup();
+			    }
+			});
 		} 
         catch (Exception e) 
         {
@@ -260,10 +264,70 @@ public class MainActivity extends Activity
 		}
     }
     
+	/*@Override
+	protected void onStop() 
+	{
+		//popupUserInfos.dismiss();
+		//super.onStop();
+	}*/
+    
+    @Override
+	protected void onResume() 
+    {
+		if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+		{
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, myLocationListener);
+		} 
+		else if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
+		{
+			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, myLocationListener);
+		}
+		super.onResume();
+	}
+
+	@Override
+	protected void onPause() 
+	{
+		super.onPause();
+		
+		locationManager.removeUpdates(myLocationListener);
+		
+		if (myMessageReceiver != null){
+	        unregisterReceiver(myMessageReceiver );
+	        myMessageReceiver = null;
+	    }
+	}
+	
+	/*@Override
+	protected void onDestroy() 
+	{
+		super.onDestroy();
+		try 
+		{
+			if (receiver != null) 
+			{
+				unregisterReceiver(receiver);
+				receiver = null;
+			}
+		} 
+		catch (Exception e) 
+		{
+			
+		}
+	}*/
+	
+	
+	
+	/* ----------------------------------------
+	 * Fonctions et procédures de l'application
+	 * ----------------------------------------
+	 */
+    
     /**
      * Fonction pour parser sur la carte, les amis de l'utilisateur connecté
      */
-    public void parseFriends()
+    @SuppressLint("NewApi")
+	public void parseFriends()
     {
     	String response = null;
     	
@@ -271,12 +335,25 @@ public class MainActivity extends Activity
         
         try 
         {
+			if (android.os.Build.VERSION.RELEASE.startsWith("2.3") || android.os.Build.VERSION.RELEASE.startsWith("3.") || 
+					android.os.Build.VERSION.RELEASE.startsWith("4.")) 
+			{
+				StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+				StrictMode.setThreadPolicy(policy);
+				
+				Log.i("Watch", "StrictMode");
+			}
+
+        	
         	response = httpClient.execute(httpGet, responseHandler);
 
 			JSONObject potes = new JSONObject(response);			
 			JSONArray potesArray = potes.getJSONObject("gpx").getJSONArray("wpt");
 			
 			Log.i("Watch", "Passage par: parseFriends()");
+			
+			if (potesArray.length() < 1)
+				return;
 
 			// Parse user frinds list into OverlayItem arraylist
 	        for (int i = 0 ; (i < potesArray.length()) ; i++ )
@@ -298,11 +375,11 @@ public class MainActivity extends Activity
             anotherItemizedIconOverlay.setFocusItemsOnTap(true);
             anotherItemizedIconOverlay.setFocusedItem(0);  
             
-            runOnUiThread(new Runnable() {
-            	 public void run() {            
-            		 myOpenMapView.postInvalidate();
-            	  }
-            	});
+			runOnUiThread(new Runnable() {
+				public void run() {
+					myOpenMapView.postInvalidate();
+				}
+			});
         } 
         catch (ClientProtocolException e) 
         {
@@ -431,21 +508,6 @@ public class MainActivity extends Activity
             return true;
         }
     };
-    
-    @Override
-	protected void onResume() 
-    {
-		super.onResume();
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, myLocationListener);
-		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, myLocationListener);
-	}
-
-	@Override
-	protected void onPause() 
-	{
-		super.onPause();
-		locationManager.removeUpdates(myLocationListener);
-	}
 	
 	/**
 	 * Mise a jours des coordonnées géographique de l'utilisateur
@@ -473,7 +535,7 @@ public class MainActivity extends Activity
 	
 	private void updateUserInterface(Location loc)
 	{
-    	try 
+    	try
     	{
 			// Update user localization coordinates
 			TextView myLocationText = (TextView)findViewById(R.id.textViewGeolocation);
@@ -566,50 +628,121 @@ public class MainActivity extends Activity
 		}
     }
     
-    /**
-     * Afficher une boite au milieu de la carte si aucun utilisateur est connectés
-     * pour proposer a l'invité, de se connecter ou s'incrire aupres du service LTP.
-     */
-    private void showAuthBox()
+    private void displayUserPopup()
     {
 		DisplayMetrics dm = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(dm);
 
-		final int height = dm.heightPixels;
+		//final int height = dm.heightPixels;
 		final int width = dm.widthPixels;
 		
 		int popupWidth = width / 2;
-		int popupHeight = height / 2;
+		//int popupHeight = height / 2;
 		
 		// Inflate the popup_layout.xml
 		LinearLayout viewGroup = (LinearLayout) this.findViewById(R.id.popup);
 		LayoutInflater layoutInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		
-		final View layout = layoutInflater.inflate(R.layout.popup_account_layout,viewGroup);		
+		final View layout = layoutInflater.inflate(R.layout.popup_account,viewGroup);		
 		layout.setBackgroundResource(R.drawable.popup_gradient);
 
-		// Creating the PopupWindow
-		final PopupWindow popup = new PopupWindow(this);
-		popup.setContentView(layout);
-		popup.setWidth(popupWidth);
-		popup.setHeight(popupHeight);
-		popup.setFocusable(true);
+		// Créer le PopupWindow
+		popupUserInfos = new PopupWindow(layout, popupWidth, LayoutParams.WRAP_CONTENT, true);
+		popupUserInfos.setBackgroundDrawable(new BitmapDrawable());
+		popupUserInfos.setOutsideTouchable(true);
 
-		// Some offset to align the popup a bit to the right, and a bit down,
-		// relative to button's position.
-		final int OFFSET_X = popupWidth / 2;
-		final int OFFSET_Y = popupHeight / 2;
-		
-		// Clear the default translucent background
-		popup.setBackgroundDrawable(new BitmapDrawable());
-		
+		// Some offset to align the popup a bit to the right, and a bit down, relative to button's position.
+		final int OFFSET_X = 0;
+		final int OFFSET_Y = 0;
+
 		// Displaying the popup at the specified location, + offsets.
-		findViewById(R.id.layoutMain).post(new Runnable() {
+		findViewById(R.id.layoutMain).post(new Runnable() 
+		{
 			@Override
-			public void run() {
-				popup.showAtLocation(layout, Gravity.NO_GRAVITY, OFFSET_X, OFFSET_Y);
+			public void run() 
+			{
+				popupUserInfos.showAtLocation(layout, Gravity.CENTER, OFFSET_X, OFFSET_Y);
 			}
 		});
+		
+		/*
+		 * Evenements composants du PopupWindow
+		 */
+		
+        // Ecouteur d'évènement sur le bouton pour se déconnecter
+		Button close = (Button) layout.findViewById(R.id.close);
+		close.setOnClickListener(new OnClickListener() 
+		{
+			@Override
+			public void onClick(View v) {
+				popupUserInfos.dismiss();
+			}
+		});
+		
+        // Ecouteur d'évènement sur le bouton pour fermer l'application
+		Button logout = (Button) layout.findViewById(R.id.btLogout);
+		logout.setOnClickListener(new OnClickListener() 
+		{
+			@Override
+			public void onClick(View v) 
+			{
+		        // Instance de SharedPreferences pour enregistrer des données dans un fichier
+		        SharedPreferences myPrefs = getSharedPreferences("UserPrefs", MODE_WORLD_READABLE); // Ici on permet donc la lecture de notre fichier de préférence à toutes les applications
+		        SharedPreferences.Editor prefsEditor = myPrefs.edit(); // Instance de l'editeur permettant d'écrire dans le fichier
+		        prefsEditor.putString("Email", null); // Données
+		        prefsEditor.putString("Password", null); // Données
+		        prefsEditor.commit(); // Valider les modifications
+		        
+		        // Redémarrer l'activité pour prendre en compte les modifications
+		        resetActivity();
+			}
+		});
+    }
+    
+    /**
+     * Afficher une boite au milieu de la carte si aucun utilisateur est connectés
+     * pour proposer a l'invité, de se connecter ou s'incrire aupres du service LTP.
+     */
+    private void displayGuestPopup()
+    {
+		DisplayMetrics dm = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(dm);
+
+		//final int height = dm.heightPixels;
+		final int width = dm.widthPixels;
+		
+		int popupWidth = width / 2;
+		//int popupHeight = height / 2;
+		
+		// Inflate the popup_layout.xml
+		LinearLayout viewGroup = (LinearLayout) this.findViewById(R.id.popup);
+		LayoutInflater layoutInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		
+		final View layout = layoutInflater.inflate(R.layout.popup_guest,viewGroup);		
+		layout.setBackgroundResource(R.drawable.popup_gradient);
+
+		// Créer le PopupWindow
+		final PopupWindow popup = new PopupWindow(layout, popupWidth, LayoutParams.WRAP_CONTENT, true);
+		popup.setBackgroundDrawable(new BitmapDrawable());
+		popup.setOutsideTouchable(true);
+
+		// Some offset to align the popup a bit to the right, and a bit down, relative to button's position.
+		final int OFFSET_X = 0;
+		final int OFFSET_Y = 0;
+
+		// Displaying the popup at the specified location, + offsets.
+		findViewById(R.id.layoutMain).post(new Runnable() 
+		{
+			@Override
+			public void run() 
+			{
+				popup.showAtLocation(layout, Gravity.CENTER, OFFSET_X, OFFSET_Y);
+			}
+		});
+		
+		/*
+		 * Evenements composants du PopupWindow
+		 */
 		
         // Ecouteur d'évènement sur le bouton des paramètres
         Button btLogin = (Button) layout.findViewById(R.id.buttonConnexion);
@@ -624,86 +757,22 @@ public class MainActivity extends Activity
         		
         		Intent i = new Intent(MainActivity.this, LoginActivity.class);    
         		startActivityForResult(i, STATIC_INTEGER_VALUE);
+        		
+        		popup.dismiss();
             }
         });
 
-		// Getting a reference to Close button, and close the popup when clicked.
+        // Ecouteur d'évènement sur le bouton pour fermer l'application
 		Button close = (Button) layout.findViewById(R.id.close);
 		close.setOnClickListener(new OnClickListener() 
 		{
 			@Override
-			public void onClick(View v) {
+			public void onClick(View v) 
+			{
 				popup.dismiss();
 			}
 		});
     }
- 
- 	/**
- 	 * Afficher une popup
- 	 * @param context
- 	 * @param p
- 	 */
-	private void showPopup(final Activity context, Point p) 
-	{
-		DisplayMetrics dm = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(dm);
-
-		final int height = dm.heightPixels;
-		final int width = dm.widthPixels;
-		
-		int popupWidth = width / 2;
-		int popupHeight = height / 2;
-
-		// Inflate the popup_layout.xml
-		LinearLayout viewGroup = (LinearLayout) context.findViewById(R.id.popup);
-		LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View layout = layoutInflater.inflate(R.layout.popup_account_layout,viewGroup);
-		
-		layout.setBackgroundResource(R.drawable.popup_gradient);
-
-		// Creating the PopupWindow
-		final PopupWindow popup = new PopupWindow(context);
-		popup.setContentView(layout);
-		popup.setWidth(popupWidth);
-		popup.setHeight(popupHeight);
-		popup.setFocusable(true);
-
-		// Some offset to align the popup a bit to the right, and a bit down,
-		// relative to button's position.
-		int OFFSET_X = popupWidth / 2;
-		int OFFSET_Y = popupHeight / 2;
-
-		// Clear the default translucent background
-		popup.setBackgroundDrawable(new BitmapDrawable());
-
-		// Displaying the popup at the specified location, + offsets.
-		popup.showAtLocation(layout, Gravity.NO_GRAVITY, p.x + OFFSET_X, p.y + OFFSET_Y);
-		
-        // Ecouteur d'évènement sur le bouton des paramètres
-        Button btLogin = (Button) layout.findViewById(R.id.buttonConnexion);
-        btLogin.setOnClickListener(new OnClickListener() 
-        {
-        	@Override
-            public void onClick(View view) 
-            {
-        		//Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-        		//startActivity(intent);
-        		
-        		Intent i = new Intent(MainActivity.this, LoginActivity.class);    
-        		startActivityForResult(i, STATIC_INTEGER_VALUE);
-            }
-        });
-
-		// Getting a reference to Close button, and close the popup when clicked.
-		Button close = (Button) layout.findViewById(R.id.close);
-		close.setOnClickListener(new OnClickListener() 
-		{
-			@Override
-			public void onClick(View v) {
-				popup.dismiss();
-			}
-		});
-	}
 
 	/**
 	 * Méthode qui se déclenchera lorsque vous appuierez sur le bouton menu du téléphone
@@ -726,36 +795,17 @@ public class MainActivity extends Activity
 	{
 		// On regarde quel item a été cliqué grâce à son id et on déclenche une action
 		switch (item.getItemId()) 
-		{
-		case R.id.logout:
-	        // Instance de SharedPreferences pour enregistrer des données dans un fichier
-	        SharedPreferences myPrefs = getSharedPreferences("UserPrefs", MODE_WORLD_READABLE); // Ici on permet donc la lecture de notre fichier de préférence à toutes les applications
-	        SharedPreferences.Editor prefsEditor = myPrefs.edit(); // Instance de l'editeur permettant d'écrire dans le fichier
-	        prefsEditor.putString("Email", null); // Données
-	        prefsEditor.putString("Password", null); // Données
-	        prefsEditor.commit(); // Valider les modifications
+		{	
+		case R.id.menuSettings:
+			Intent i = new Intent(this, SettingsActivity.class);
+	        startActivity(i);
 	        
-	        // Redémarrer l'activité pour prendre en compte les modifications
-	        resetActivity();
-	        
-			return true;
-		case R.id.exit:
+	        return true;
+		case R.id.menuExit:
 			finish();
 			return true;
 		}
 		return false;
-	}
-    
-	/**
-	 * Afficher ou pas la minimap
-	 * @param isEnabled
-	 */
-	public static void enableMinimap(boolean isEnabled) 
-	{
-		if (isEnabled)
-			myOpenMapView.getOverlays().add(miniMapOverlay);
-		else
-			myOpenMapView.getOverlays().remove(miniMapOverlay);
 	}
 	
 	public void resetActivity()

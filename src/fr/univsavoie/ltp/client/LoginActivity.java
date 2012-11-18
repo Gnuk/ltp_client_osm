@@ -5,19 +5,16 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 public class LoginActivity extends MainActivity 
 {
 	SharedPreferences settings;
 	SharedPreferences.Editor editor;
 	Intent resultIntent;
-	
-	private String PUBLIC_STATIC_STRING_IDENTIFIER = "test";
     
     /** Called when the activity is first created. */
     public void onCreate(Bundle savedInstanceState) 
@@ -28,7 +25,7 @@ public class LoginActivity extends MainActivity
         setContentView(R.layout.activity_login);    
         
         resultIntent = new Intent(this, MainActivity.class);
-        resultIntent.putExtra(PUBLIC_STATIC_STRING_IDENTIFIER, 1);
+        resultIntent.putExtra("test", 1);
         
         SharedVariables.displayAuthbox = false;
         
@@ -57,5 +54,13 @@ public class LoginActivity extends MainActivity
 				finish();
 			}
 		});
+	}
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+	    if ( keyCode == KeyEvent.KEYCODE_MENU ) {
+	        return true;
+	    }
+	    return super.onKeyDown(keyCode, event);
 	}
 }
