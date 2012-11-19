@@ -59,12 +59,11 @@ import org.osmdroid.views.overlay.SimpleLocationOverlay;
 import fr.univsavoie.ltp.client.tools.SharedVariables;
 import fr.univsavoie.ltp.client.tools.SimpleSSLSocketFactory;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -74,7 +73,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -119,11 +118,11 @@ public class MainActivity extends Activity
 	/* Variables de gestion */
 	private boolean displayAuthBox, displayMiniMap;
 	private String login;
-	private int STATIC_INTEGER_VALUE = 0;
-	private BroadcastReceiver myMessageReceiver;
 	private Point p;
+	private PopupWindow popupGuest, popupUserInfos;
 	
-	private PopupWindow popupUserInfos;
+	/* Variables constantes */
+	private static final int CODE_MON_ACTIVITE = 1;
 	
 	
     /* --------------------------------------------------------
@@ -138,26 +137,114 @@ public class MainActivity extends Activity
     	super.onCreate(savedInstanceState);
     	
     	// Création de l'activité principale
-        setContentView(R.layout.activity_main);  
+        setContentView(R.layout.activity_main);
         
+        Log.e("Watch", "Activity Start");
+        
+        init();
+    }
+    
+	@Override
+	protected void onStop() 
+	{
+		super.onStop();
+	}
+    
+	@Override
+	protected void onDestroy() 
+	{
+		super.onDestroy();
+
+		if (login == null) {
+			SharedVariables.displayAuthbox = true;
+		}
+
+		finish();
+	}
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) 
+	{
+		super.onConfigurationChanged(newConfig);
+		Toast.makeText(MainActivity.this,
+				"onConfigurationChanged(): " + newConfig.toString(),
+				Toast.LENGTH_SHORT).show();
+	}
+       
+    
+    @Override
+	protected void onResume() 
+    {
+		if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+		{
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, myLocationListener);
+		} 
+		else if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
+		{
+			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, myLocationListener);
+		}
+		 
+		super.onResume();
+	}
+
+	@Override
+	protected void onPause() 
+	{
+		super.onPause();
+	}
+	
+	
+	
+	/* ----------------------------------------
+	 * Fonctions et procédures de l'application
+	 * ----------------------------------------
+	 */
+	
+	/**
+	 * Procédure qui s'occupe de mettre a jours certains variables
+	 * locales à l'activité par rapport à la session utilisateur, affichage
+	 * ou pas de certains composants...
+	 */
+	private void setup()
+	{
+		// On recupère les préférences utilisateurs paramètrer dans l'activité des Paramètres
+		SharedPreferences userPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		displayMiniMap = userPrefs.getBoolean("checkBoxDisplayMinimap", true);
+		
         // L'utilisateur est t'il deja connecté ?
         displayAuthBox = SharedVariables.displayAuthbox;
         
 		// Instance de SharedPreferences pour lire les données dans un fichier
 		SharedPreferences myPrefs = this.getSharedPreferences("UserPrefs", MODE_WORLD_READABLE); 
 		login = myPrefs.getString("Email", null);
-		displayMiniMap = myPrefs.getBoolean("DisplayMinimap", false);
+		
+		// Afficher la boite de dialogue au démarrage ?
+		// Si oui, celle anonyme ou utilisateur connecté ?
+    	if (displayAuthBox)
+    	{
+			if (login == null)
+				displayGuestPopup();
+			else
+				displayUserPopup();
+    	}
+    	
+    	// On met a jours la barre infos de l'utilisateur
+    	TextView txtUserStatus = (TextView)findViewById(R.id.textViewUserStatus);
+		if (login == null)
+			txtUserStatus.setText("Salut, Etranger, connecte toi!");
+		else
+			txtUserStatus.setText("Salut, " + login + "! ");
+	}
+	
+    /**
+     * Initialiser les composants de l'application
+     */
+    private void init()
+    {
+    	setup();
         
         try 
         {
-        	if (displayAuthBox)
-        	{
-    			if (login == null)
-    				displayGuestPopup();
-    			else
-    				displayUserPopup();
-        	}
-			
 			// MapView settings
 			myOpenMapView = (MapView)findViewById(R.id.openmapview);
 			myOpenMapView.setTileSource(TileSourceFactory.MAPNIK);
@@ -216,7 +303,7 @@ public class MainActivity extends Activity
 			
 			// Create a minimap overlay
 			miniMapOverlay = new MinimapOverlay(this, myOpenMapView.getTileRequestCompleteHandler());
-			miniMapOverlay.setZoomDifference(10);
+			miniMapOverlay.setZoomDifference(8);
 			miniMapOverlay.setHeight(100);
 			miniMapOverlay.setWidth(100);
 			if (displayMiniMap) // Selon les paramètres utilisateur, afficher ou pas la minimap
@@ -240,9 +327,9 @@ public class MainActivity extends Activity
 			btSettings.setOnClickListener(new View.OnClickListener() 
 			{
 			    public void onClick(View view) 
-			    {
-			        Intent myIntent = new Intent(view.getContext(), LoginActivity.class);
-			        startActivityForResult(myIntent, 0);
+			    {			      
+		    		Intent i = new Intent(MainActivity.this, UserPreferencesActivity.class);    
+		    		startActivityForResult(i, 2);
 			    }
 			});
 			
@@ -264,65 +351,6 @@ public class MainActivity extends Activity
         	Log.e("Catch", "> onCreate() - Exception : " + e.getMessage());
 		}
     }
-    
-	/*@Override
-	protected void onStop() 
-	{
-		//popupUserInfos.dismiss();
-		//super.onStop();
-	}*/
-    
-    @Override
-	protected void onResume() 
-    {
-		if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
-		{
-			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, myLocationListener);
-		} 
-		else if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
-		{
-			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, myLocationListener);
-		}
-		super.onResume();
-	}
-
-	@Override
-	protected void onPause() 
-	{
-		super.onPause();
-		
-		locationManager.removeUpdates(myLocationListener);
-		
-		if (myMessageReceiver != null){
-	        unregisterReceiver(myMessageReceiver );
-	        myMessageReceiver = null;
-	    }
-	}
-	
-	/*@Override
-	protected void onDestroy() 
-	{
-		super.onDestroy();
-		try 
-		{
-			if (receiver != null) 
-			{
-				unregisterReceiver(receiver);
-				receiver = null;
-			}
-		} 
-		catch (Exception e) 
-		{
-			
-		}
-	}*/
-	
-	
-	
-	/* ----------------------------------------
-	 * Fonctions et procédures de l'application
-	 * ----------------------------------------
-	 */
     
     /**
      * Fonction pour parser sur la carte, les amis de l'utilisateur connecté
@@ -567,7 +595,7 @@ public class MainActivity extends Activity
     	try
     	{
 			// Update user localization coordinates
-			TextView myLocationText = (TextView)findViewById(R.id.textViewGeolocation);
+			TextView myLocationText = (TextView)findViewById(R.id.textViewUserStatus);
 			String latLongString = "";
 			if (loc != null) {
 			    double lat = loc.getLatitude();
@@ -722,8 +750,16 @@ public class MainActivity extends Activity
 		        prefsEditor.putString("Password", null); // Données
 		        prefsEditor.commit(); // Valider les modifications
 		        
+		        popupUserInfos.dismiss();
+		        
+		        SharedVariables.displayAuthbox = true;
+		        
 		        // Redémarrer l'activité pour prendre en compte les modifications
-		        resetActivity();
+				Intent intent = getIntent();
+				finish();
+				startActivity(intent);
+
+		        
 			}
 		});
     }
@@ -751,9 +787,9 @@ public class MainActivity extends Activity
 		layout.setBackgroundResource(R.drawable.popup_gradient);
 
 		// Créer le PopupWindow
-		final PopupWindow popup = new PopupWindow(layout, popupWidth, LayoutParams.WRAP_CONTENT, true);
-		popup.setBackgroundDrawable(new BitmapDrawable());
-		popup.setOutsideTouchable(true);
+		popupGuest = new PopupWindow(layout, popupWidth, LayoutParams.WRAP_CONTENT, true);
+		popupGuest.setBackgroundDrawable(new BitmapDrawable());
+		popupGuest.setOutsideTouchable(true);
 
 		// Some offset to align the popup a bit to the right, and a bit down, relative to button's position.
 		final int OFFSET_X = 0;
@@ -765,7 +801,7 @@ public class MainActivity extends Activity
 			@Override
 			public void run() 
 			{
-				popup.showAtLocation(layout, Gravity.CENTER, OFFSET_X, OFFSET_Y);
+				popupGuest.showAtLocation(layout, Gravity.CENTER, OFFSET_X, OFFSET_Y);
 			}
 		});
 		
@@ -784,10 +820,13 @@ public class MainActivity extends Activity
         		//startActivity(intent);
         		SharedVariables.displayAuthbox = false;
         		
-        		Intent i = new Intent(MainActivity.this, LoginActivity.class);    
-        		startActivityForResult(i, STATIC_INTEGER_VALUE);
+        		popupGuest.dismiss();
         		
-        		popup.dismiss();
+        		// La constante CODE_MON_ACTIVITE représente l’identifiant de la requête
+        		// (requestCode) qui sera utilisé plus tard pour identifier l’activité
+        		// renvoyant la valeur de retour.
+        		Intent i = new Intent(MainActivity.this, LoginActivity.class);    
+        		startActivityForResult(i, 1);
             }
         });
 
@@ -798,7 +837,7 @@ public class MainActivity extends Activity
 			@Override
 			public void onClick(View v) 
 			{
-				popup.dismiss();
+				popupGuest.dismiss();
 			}
 		});
     }
@@ -826,9 +865,8 @@ public class MainActivity extends Activity
 		switch (item.getItemId()) 
 		{	
 		case R.id.menuSettings:
-			Intent i = new Intent(this, SettingsActivity.class);
-	        startActivity(i);
-	        
+    		Intent i = new Intent(MainActivity.this, UserPreferencesActivity.class);    
+    		startActivityForResult(i, 2);
 	        return true;
 		case R.id.menuExit:
 			finish();
@@ -837,22 +875,53 @@ public class MainActivity extends Activity
 		return false;
 	}
 	
-	public void resetActivity()
-	{
-		Intent intent = getIntent();
-		finish();
-		startActivity(intent);
-	}
-	
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) 
 	{
 		super.onActivityResult(requestCode, resultCode, data);
-		if (resultCode == Activity.RESULT_OK) 
+		
+		// Le code de requête est utilisé pour identifier l’activité enfant
+		switch (requestCode) 
 		{
-			// On relance l'activité car on doit rafraichir la map !
-			finish();
-			startActivity(getIntent());
+		// Cas si authentification
+		case 1:
+			switch (resultCode) 
+			{
+			case RESULT_OK:
+				Toast.makeText(this, "Authentification réussit !", Toast.LENGTH_LONG).show();
+				setup();
+				auth();
+				parseFriends();
+				return;
+			case RESULT_CANCELED:
+				Toast.makeText(this, "Authentification échouée !", Toast.LENGTH_LONG).show();
+				return;
+			default:
+				// Faire quelque chose
+				return;
+			}
+		
+		// Cas si paramètres utilisateur
+		case 2:
+			switch (resultCode) 
+			{
+			case RESULT_OK:
+				// On relance l'activité car on doit rafraichir la map !
+				finish();
+				startActivity(getIntent());
+				return;
+			case RESULT_CANCELED:
+				Toast.makeText(this, "Erreur lors de la modification des préférences !", Toast.LENGTH_LONG).show();
+				return;
+			default:
+				// Faire quelque chose
+				return;
+			}
+		
+		// Aucune activité en retour...
+		default:
+			// Faire quelque chose
+			return;
 		}
 	}
 	

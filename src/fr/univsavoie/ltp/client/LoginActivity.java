@@ -10,7 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-public class LoginActivity extends MainActivity 
+public class LoginActivity extends Activity 
 {
 	SharedPreferences settings;
 	SharedPreferences.Editor editor;
@@ -22,10 +22,9 @@ public class LoginActivity extends MainActivity
         super.onCreate(savedInstanceState);
         
         // Create settings activity
-        setContentView(R.layout.activity_login);    
+        setContentView(R.layout.activity_login);
         
-        resultIntent = new Intent(this, MainActivity.class);
-        resultIntent.putExtra("test", 1);
+        // Mise a jours pour dire de ne plus affiché la popup de connexion
         
         SharedVariables.displayAuthbox = false;
         
@@ -46,7 +45,8 @@ public class LoginActivity extends MainActivity
 		        prefsEditor.putString("Password", password.getText().toString()); // Données
 		        prefsEditor.commit(); // Valider les modifications
 				
-		        setResult(Activity.RESULT_OK, resultIntent);
+		        // Renvoyer une valeur à l'activité principal
+		        setResult(Activity.RESULT_OK);
 
 		        // On quitter cette activity...
 		        // ... et via onActivityResult, on reappel les fonctions de login / affichage de carte

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+<PreferenceCategory android:title="Affichage">
+     <CheckBoxPreference
+        android:key="checkBoxDisplayMinimap"
+        android:summary="Afficher la minimap"
+        android:summaryOff="Désactiver la mini carte (recommandé si petit écran ou mobile peu performant)."
+        android:summaryOn="Afficher une mini carte pour plus de précision."
+        android:title="Afficher la minimap" />
+     
+          <CheckBoxPreference
+        android:key="checkBoxDisplayUserStatus"
+        android:summary="Afficher l'écran d'accueil"
+        android:summaryOff="Ne plus afficher vos informations a chaque démarrage de l'application"
+        android:summaryOn="Afficher a chaque démarrage de l'application vos dérnières informations."
+        android:title="Afficher l'écran d'accueil" />
+    </PreferenceCategory>
+
+</PreferenceScreen>
