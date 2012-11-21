@@ -48,6 +48,7 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapController;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.MapView.Projection;
 import org.osmdroid.views.overlay.ItemizedIconOverlay;
 import org.osmdroid.views.overlay.ItemizedIconOverlay.OnItemGestureListener;
 import org.osmdroid.views.overlay.ItemizedOverlayWithFocus;
@@ -108,7 +109,7 @@ public class MainActivity extends Activity
 	private LocationManager locationManager;
 	private Location lastLocation;
 	private ArrayList<OverlayItem> overlayItemArray;
-	private MinimapOverlay miniMapOverlay;
+	//private MinimapOverlay miniMapOverlay;
 	
 	/* Variables du service HTTP / Apache */
 	private DefaultHttpClient httpClient;
@@ -123,7 +124,7 @@ public class MainActivity extends Activity
 	
 	/* Variables constantes */
 	private static final int CODE_MON_ACTIVITE = 1;
-	
+	private ArrayList<OverlayItem> anotherOverlayItemArray;
 	
     /* --------------------------------------------------------
      * Evenements de l'activity (onCreate, onResume, onStop...)
@@ -298,19 +299,19 @@ public class MainActivity extends Activity
 			}
 			
 			//Add Scale Bar
-			ScaleBarOverlay myScaleBarOverlay = new ScaleBarOverlay(this);
-			myOpenMapView.getOverlays().add(myScaleBarOverlay);
+			//ScaleBarOverlay myScaleBarOverlay = new ScaleBarOverlay(this);
+			//myOpenMapView.getOverlays().add(myScaleBarOverlay);
 			
 			// Create a minimap overlay
-			miniMapOverlay = new MinimapOverlay(this, myOpenMapView.getTileRequestCompleteHandler());
-			miniMapOverlay.setZoomDifference(8);
-			miniMapOverlay.setHeight(100);
-			miniMapOverlay.setWidth(100);
-			if (displayMiniMap) // Selon les paramètres utilisateur, afficher ou pas la minimap
-				myOpenMapView.getOverlays().add(miniMapOverlay);
-			else
-				if (myOpenMapView.getOverlays().contains(miniMapOverlay))
-					myOpenMapView.getOverlays().remove(miniMapOverlay);
+			//miniMapOverlay = new MinimapOverlay(this, myOpenMapView.getTileRequestCompleteHandler());
+			//miniMapOverlay.setZoomDifference(8);
+			//miniMapOverlay.setHeight(100);
+			//miniMapOverlay.setWidth(100);
+			//if (displayMiniMap) // Selon les paramètres utilisateur, afficher ou pas la minimap
+				//myOpenMapView.getOverlays().add(miniMapOverlay);
+			//else
+				//if (myOpenMapView.getOverlays().contains(miniMapOverlay))
+					//myOpenMapView.getOverlays().remove(miniMapOverlay);
 			      
 			// Prepare array of users icons in map
 			/*ArrayList<OverlayItem> anotherOverlayItemArray;
@@ -330,6 +331,15 @@ public class MainActivity extends Activity
 			    {			      
 		    		Intent i = new Intent(MainActivity.this, UserPreferencesActivity.class);    
 		    		startActivityForResult(i, 2);
+			    }
+			});
+			
+			Button btTest = (Button) findViewById(R.id.btTest);
+			btTest.setOnClickListener(new View.OnClickListener() 
+			{
+			    public void onClick(View view) 
+			    {			      
+		    		updateLoc(lastLocation);
 			    }
 			});
 			
@@ -359,7 +369,7 @@ public class MainActivity extends Activity
     {
     	String response = null;
     	
-        ArrayList<OverlayItem> anotherOverlayItemArray = new ArrayList<OverlayItem>();
+        anotherOverlayItemArray = new ArrayList<OverlayItem>();
         
         try 
         {
@@ -524,7 +534,7 @@ public class MainActivity extends Activity
 			httpClient.setCredentialsProvider(authCred);
 
 			//httpGet = new HttpGet("http://jibiki.univ-savoie.fr/teapot/api/localisations/carron/friendships?format=json");
-			httpGet = new HttpGet("https://jibiki.univ-savoie.fr/ltpdev/?p=json");
+			httpGet = new HttpGet("https://jibiki.univ-savoie.fr/ltpdev/?p=rest&format=json&service=status&method=get");
 			//httpGet = new HttpGet("http://jibiki.univ-savoie.fr/ltp/api/localisations/"+login+"/friendships?format=json");
 			responseHandler = new BasicResponseHandler();
 		} 
@@ -548,10 +558,6 @@ public class MainActivity extends Activity
     
     OnItemGestureListener<OverlayItem> myOnItemGestureListener = new OnItemGestureListener<OverlayItem>() 
 	{
-        @Override
-        public boolean onItemLongPress(int arg0, OverlayItem arg1) {
-            return false;
-        }
      
         @Override
         public boolean onItemSingleTapUp(int index, OverlayItem item) {
@@ -564,6 +570,14 @@ public class MainActivity extends Activity
                  
             return true;
         }
+
+		@Override
+		public boolean onItemLongPress(int arg0, OverlayItem arg1) {
+			Log.d("Watch", "ouais!!!!!");
+			return false;
+		}
+        
+
     };
 	
 	/**
@@ -625,7 +639,7 @@ public class MainActivity extends Activity
     {
 		@Override
 		public void onLocationChanged(Location location) {
-			updateLoc(location);
+			//updateLoc(location);
 		}
 
 		@Override
@@ -649,10 +663,12 @@ public class MainActivity extends Activity
      */
     private class MyItemizedIconOverlay extends ItemizedIconOverlay<OverlayItem>
     {
-		public MyItemizedIconOverlay(
+		public MyItemizedIconOverlay
+		(
 				List<OverlayItem> pList,
 				org.osmdroid.views.overlay.ItemizedIconOverlay.OnItemGestureListener<OverlayItem> pOnItemGestureListener,
-				ResourceProxy pResourceProxy) {
+				ResourceProxy pResourceProxy) 
+		{
 			super(pList, pOnItemGestureListener, pResourceProxy);
 		}
 
@@ -680,8 +696,15 @@ public class MainActivity extends Activity
 		@Override
 		public boolean onSingleTapUp(MotionEvent event, MapView mapView) 
 		{
-			return super.onSingleTapUp(event, mapView);
-			//return true;
+			//return super.onSingleTapUp(event, mapView);
+			return true;
+		}
+		
+		@Override
+		public boolean onLongPress(MotionEvent event, MapView mapView)
+		{
+			return false;
+			//return super.onLongPress(event, mapView);
 		}
     }
     
@@ -721,6 +744,28 @@ public class MainActivity extends Activity
 				popupUserInfos.showAtLocation(layout, Gravity.CENTER, OFFSET_X, OFFSET_Y);
 			}
 		});
+		
+		/*
+		 * Ecouteur d'évènement TextView
+		 */
+		/*TextView textView1 = (TextView) layout.findViewById(R.id.textView1);
+		textView1.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Log.d("tagteam","Test1");
+			}
+		});
+		
+		TextView textView2 = (TextView) layout.findViewById(R.id.textView2);
+		textView2.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Log.d("tagteam","Test2");
+			}
+		});*/
+		 
 		
 		/*
 		 * Evenements composants du PopupWindow

@@ -1,11 +1,18 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layoutMain"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical"
-    android:id="@+id/layoutMain" >
+    android:orientation="vertical" >
 	
     <!-- Barre des menus -->
+    
+        <org.osmdroid.views.MapView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/openmapview"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        />
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -44,12 +51,76 @@
             android:layout_height="22dp"
             android:background="@drawable/ic_menu_mylocation" />
     </LinearLayout>
-    
-    <org.osmdroid.views.MapView
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/openmapview"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        />
 
-</LinearLayout>
+    <ScrollView
+        android:id="@+id/scrollViewFriendList"
+        android:layout_width="fill_parent"
+        android:layout_height="178dp"
+        android:layout_gravity="bottom"
+        android:layout_margin="5dp" >
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Jean"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+            
+                <TextView
+                android:id="@+id/textView2"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Marc"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+                
+                <TextView
+                android:id="@+id/textView3"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Paul"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+                                <TextView
+                android:id="@+id/textView4"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Alex"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+                                
+                                                <TextView
+                android:id="@+id/textView5"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Marie"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+                                                
+                                                                <TextView
+                android:id="@+id/textView6"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Ami6"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+                                                                
+                                                                <TextView
+                android:id="@+id/textView7"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Bob"
+                android:textAppearance="?android:attr/textAppearanceLarge" />                                                                
+
+                                                                <TextView
+                android:id="@+id/textView8"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Benjamin"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+                                                                                                                                
+        </LinearLayout>
+    </ScrollView>
+
+</FrameLayout>
