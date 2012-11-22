@@ -9,7 +9,7 @@
         android:title="Afficher la minimap" />
      
           <CheckBoxPreference
-        android:key="checkBoxDisplayUserStatus"
+        android:key="checkBoxDisplayUserInfos"
         android:summary="Afficher l'écran d'accueil"
         android:summaryOff="Ne plus afficher vos informations a chaque démarrage de l'application"
         android:summaryOn="Afficher a chaque démarrage de l'application vos dérnières informations."

@@ -48,19 +48,21 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapController;
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.MapView.Projection;
 import org.osmdroid.views.overlay.ItemizedIconOverlay;
 import org.osmdroid.views.overlay.ItemizedIconOverlay.OnItemGestureListener;
 import org.osmdroid.views.overlay.ItemizedOverlayWithFocus;
-import org.osmdroid.views.overlay.MinimapOverlay;
 import org.osmdroid.views.overlay.OverlayItem;
-import org.osmdroid.views.overlay.ScaleBarOverlay;
 import org.osmdroid.views.overlay.SimpleLocationOverlay;
+
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.SubMenu;
 
 import fr.univsavoie.ltp.client.tools.SharedVariables;
 import fr.univsavoie.ltp.client.tools.SimpleSSLSocketFactory;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -79,9 +81,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -95,7 +94,7 @@ import android.widget.Toast;
 /**
  * MainActivity l'activité principale de l'application Android
  */
-public class MainActivity extends Activity 
+public class MainActivity extends SherlockActivity 
 {
 	/* --------------------------------
 	 * Variables globales de l'activité
@@ -109,7 +108,6 @@ public class MainActivity extends Activity
 	private LocationManager locationManager;
 	private Location lastLocation;
 	private ArrayList<OverlayItem> overlayItemArray;
-	//private MinimapOverlay miniMapOverlay;
 	
 	/* Variables du service HTTP / Apache */
 	private DefaultHttpClient httpClient;
@@ -117,13 +115,11 @@ public class MainActivity extends Activity
 	private ResponseHandler<String> responseHandler;
 	
 	/* Variables de gestion */
-	private boolean displayAuthBox, displayMiniMap;
+	private boolean displayAuthBox, displayUserInfos;
 	private String login;
-	private Point p;
 	private PopupWindow popupGuest, popupUserInfos;
 	
 	/* Variables constantes */
-	private static final int CODE_MON_ACTIVITE = 1;
 	private ArrayList<OverlayItem> anotherOverlayItemArray;
 	
     /* --------------------------------------------------------
@@ -137,13 +133,142 @@ public class MainActivity extends Activity
     {
     	super.onCreate(savedInstanceState);
     	
+    	// Appliquer le thème LTP a l'ActionBar
+    	setTheme(R.style.Theme_ltp);
+    	
     	// Création de l'activité principale
         setContentView(R.layout.activity_main);
         
         Log.e("Watch", "Activity Start");
         
+        // Afficher la ActionBar
+        ActionBar mActionBar = getSupportActionBar();
+        mActionBar.setHomeButtonEnabled(true);
+        mActionBar.setDisplayShowHomeEnabled(true);
+        
+        // Initialiser tout ce qui est données utilisateur propres a l'activité
         init();
     }
+    
+	// Création d'un menu contenant un bouton rafraichir et un menu déroulant
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) 
+	{
+		menu.add(0, 1, 0, "Retour à ma position").setIcon(R.drawable.ic_10_device_access_location_found)
+		.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+
+		menu.add(0, 2, 1, "Paramètres de l'application").setIcon(R.drawable.ic_2_action_settings)
+		.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+		
+		menu.add(0, 3, 2, "Rafraichir la carte").setIcon(R.drawable.ic_1_navigation_refresh)
+		.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+		
+		SubMenu sub = menu.addSubMenu(0, 4, 3, "Mon compte");
+		sub.add(0, 5, 4, "Afficher mes informations");
+		sub.add(0, 6, 5, "Se déconnecter");
+		sub.getItem().setShowAsAction(
+				MenuItem.SHOW_AS_ACTION_IF_ROOM
+						| MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+		return true;
+	}
+
+	// Methode callback appelée lorqu'un item du menu est sélcetionné
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) 
+	{
+		// Le bouton "retour" a le même title que la page.
+		if (item.getTitle().toString().compareTo(getTitle().toString()) == 0)
+			finish();
+		
+		Log.d("Watch", String.valueOf(item.getItemId()));
+		
+		switch (item.getItemId()) 
+		{
+		// Quitter l'application
+		case 0:
+			finish();
+			break;
+			
+		// Se refixer au dernier point localisé de l'utilisateur	
+		case 1:
+			updateLoc(lastLocation);
+			break;			
+
+		// Afficher les préférences
+		case 2:
+    		Intent i = new Intent(MainActivity.this, UserPreferencesActivity.class);    
+    		startActivityForResult(i, 2);
+			break;
+			
+		// Déconnecter l'utilisateur actif
+		case 6:
+			userLogout();
+			break;			
+			
+		default:
+			break;
+		}
+		return true;
+	}
+	
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) 
+	{
+		super.onActivityResult(requestCode, resultCode, data);
+		
+		// Le code de requête est utilisé pour identifier l’activité enfant
+		switch (requestCode) 
+		{
+		// Cas si authentification
+		case 1:
+			switch (resultCode) 
+			{
+			case RESULT_OK:
+				Toast.makeText(this, "Authentification réussit !", Toast.LENGTH_LONG).show();
+				setup();
+				auth();
+				parseFriends();
+				return;
+			case RESULT_CANCELED:
+				Toast.makeText(this, "Authentification échouée !", Toast.LENGTH_LONG).show();
+				return;
+			default:
+				// Faire quelque chose
+				return;
+			}
+		
+		// Cas si paramètres utilisateur
+		case 2:
+			switch (resultCode) 
+			{
+			case RESULT_OK:
+				// On relance l'activité car on doit rafraichir la map !
+				finish();
+				startActivity(getIntent());
+				return;
+			case RESULT_CANCELED:
+				Toast.makeText(this, "Erreur lors de la modification des préférences !", Toast.LENGTH_LONG).show();
+				return;
+			default:
+				// Faire quelque chose
+				return;
+			}
+		
+		// Aucune activité en retour...
+		default:
+			// Faire quelque chose
+			return;
+		}
+	}
+	
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) 
+	{
+		super.onConfigurationChanged(newConfig);
+		Toast.makeText(MainActivity.this,
+				"onConfigurationChanged(): " + newConfig.toString(),
+				Toast.LENGTH_SHORT).show();
+	}
     
 	@Override
 	protected void onStop() 
@@ -162,17 +287,7 @@ public class MainActivity extends Activity
 
 		finish();
 	}
-
-	@Override
-	public void onConfigurationChanged(Configuration newConfig) 
-	{
-		super.onConfigurationChanged(newConfig);
-		Toast.makeText(MainActivity.this,
-				"onConfigurationChanged(): " + newConfig.toString(),
-				Toast.LENGTH_SHORT).show();
-	}
-       
-    
+	
     @Override
 	protected void onResume() 
     {
@@ -210,7 +325,7 @@ public class MainActivity extends Activity
 	{
 		// On recupère les préférences utilisateurs paramètrer dans l'activité des Paramètres
 		SharedPreferences userPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-		displayMiniMap = userPrefs.getBoolean("checkBoxDisplayMinimap", true);
+		displayUserInfos = userPrefs.getBoolean("checkBoxDisplayUserInfos", false);
 		
         // L'utilisateur est t'il deja connecté ?
         displayAuthBox = SharedVariables.displayAuthbox;
@@ -221,13 +336,11 @@ public class MainActivity extends Activity
 		
 		// Afficher la boite de dialogue au démarrage ?
 		// Si oui, celle anonyme ou utilisateur connecté ?
-    	if (displayAuthBox)
-    	{
-			if (login == null)
-				displayGuestPopup();
-			else
-				displayUserPopup();
-    	}
+		if (login == null)
+			popupGuest();
+		else
+			if (displayUserInfos)
+				popupDisplayUserInfos();
     	
     	// On met a jours la barre infos de l'utilisateur
     	TextView txtUserStatus = (TextView)findViewById(R.id.textViewUserStatus);
@@ -301,61 +414,13 @@ public class MainActivity extends Activity
 			//Add Scale Bar
 			//ScaleBarOverlay myScaleBarOverlay = new ScaleBarOverlay(this);
 			//myOpenMapView.getOverlays().add(myScaleBarOverlay);
-			
-			// Create a minimap overlay
-			//miniMapOverlay = new MinimapOverlay(this, myOpenMapView.getTileRequestCompleteHandler());
-			//miniMapOverlay.setZoomDifference(8);
-			//miniMapOverlay.setHeight(100);
-			//miniMapOverlay.setWidth(100);
-			//if (displayMiniMap) // Selon les paramètres utilisateur, afficher ou pas la minimap
-				//myOpenMapView.getOverlays().add(miniMapOverlay);
-			//else
-				//if (myOpenMapView.getOverlays().contains(miniMapOverlay))
-					//myOpenMapView.getOverlays().remove(miniMapOverlay);
 			      
 			// Prepare array of users icons in map
 			/*ArrayList<OverlayItem> anotherOverlayItemArray;
 			anotherOverlayItemArray = new ArrayList<OverlayItem>();
 			anotherOverlayItemArray.add(new OverlayItem("0, 0", "0, 0", new GeoPoint(0, 0)));
 			anotherOverlayItemArray.add(new OverlayItem("Chuck Norris", "Alors, on va boire une bierre ?", new GeoPoint(38.883333, -77.016667)));*/
-			
-			/*
-			 * Evenements sur composants
-			 */
-			
-			// Ecouteur d'évènement sur le bouton des paramètres
-			Button btSettings = (Button) findViewById(R.id.btSettings);
-			btSettings.setOnClickListener(new View.OnClickListener() 
-			{
-			    public void onClick(View view) 
-			    {			      
-		    		Intent i = new Intent(MainActivity.this, UserPreferencesActivity.class);    
-		    		startActivityForResult(i, 2);
-			    }
-			});
-			
-			Button btTest = (Button) findViewById(R.id.btTest);
-			btTest.setOnClickListener(new View.OnClickListener() 
-			{
-			    public void onClick(View view) 
-			    {			      
-		    		updateLoc(lastLocation);
-			    }
-			});
-			
-			// Ecouteur d'évènement sur le bouton des paramètres
-			Button btAccount = (Button) findViewById(R.id.buttonMyAccount);
-			btAccount.setOnClickListener(new View.OnClickListener() 
-			{
-			    public void onClick(View view) 
-			    {
-					if (login == null)
-						displayGuestPopup();
-					else
-						displayUserPopup();
-			    }
-			});
-		} 
+        } 
         catch (Exception e) 
         {
         	Log.e("Catch", "> onCreate() - Exception : " + e.getMessage());
@@ -443,25 +508,18 @@ public class MainActivity extends Activity
             anotherItemizedIconOverlay.setFocusedItem(0);  
             
 			runOnUiThread(new Runnable() {
+				@Override
 				public void run() {
 					myOpenMapView.postInvalidate();
 				}
 			});
-        } 
-        catch (ClientProtocolException e) 
-        {
+		} catch (ClientProtocolException e) {
 			Log.e("Catch", "> parseFriends() - ClientProtocolException: " + e.getMessage());
-		} 
-        catch (IOException e) 
-        {
+		} catch (IOException e) {
 			Log.e("Catch", "> parseFriends() - IOException: " + e.getMessage());
-		} 
-        catch (JSONException e) 
-        {
+		} catch (JSONException e) {
 			Log.e("Catch", "> parseFriends() - JSONException: " + e.getMessage());
-		} 
-        catch (Exception e) 
-        {
+		} catch (Exception e) {
 			Log.e("Catch", "> parseFriends() - Exception: " + e.getMessage());
 		}
     }
@@ -483,6 +541,7 @@ public class MainActivity extends Activity
 			
 			HttpRequestInterceptor preemptiveAuth = new HttpRequestInterceptor() 
 			{
+				@Override
 				public void process(final HttpRequest request,
 						final HttpContext context) throws HttpException, IOException {
 					AuthState authState = (AuthState) context.getAttribute(ClientContext.TARGET_AUTH_STATE);
@@ -615,10 +674,11 @@ public class MainActivity extends Activity
 			    double lat = loc.getLatitude();
 			    double lng = loc.getLongitude();
 			    latLongString = "Lat:" + lat + ", Long:" + lng;
+			    myLocationText.setText("Vos coordonnées GPS: " + latLongString);
 			} else {
-			    latLongString = "No location found";
+			    myLocationText.setText("Votre position actuel n'a pas été trouvé !");
 			}
-			myLocationText.setText("Your Current Position is: " + latLongString);
+			
 		} 
     	catch (Exception e) 
     	{
@@ -708,7 +768,31 @@ public class MainActivity extends Activity
 		}
     }
     
-    private void displayUserPopup()
+    /**
+     * Procédure qui déconnecte l'utilisateur actif
+     */
+    private void userLogout()
+    {
+        // Instance de SharedPreferences pour enregistrer des données dans un fichier
+        SharedPreferences myPrefs = getSharedPreferences("UserPrefs", MODE_WORLD_READABLE); // Ici on permet donc la lecture de notre fichier de préférence à toutes les applications
+        SharedPreferences.Editor prefsEditor = myPrefs.edit(); // Instance de l'editeur permettant d'écrire dans le fichier
+        prefsEditor.putString("Email", null); // Données
+        prefsEditor.putString("Password", null); // Données
+        prefsEditor.commit(); // Valider les modifications
+        
+        SharedVariables.displayAuthbox = true;
+        
+        // Redémarrer l'activité pour prendre en compte les modifications
+		Intent intent = getIntent();
+		finish();
+		startActivity(intent);
+    }
+    
+    /**
+     * Afficher sur la map un popup qui affiche les
+     * informations de l'utilisateur connecté.
+     */
+    private void popupDisplayUserInfos()
     {
 		DisplayMetrics dm = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(dm);
@@ -746,28 +830,6 @@ public class MainActivity extends Activity
 		});
 		
 		/*
-		 * Ecouteur d'évènement TextView
-		 */
-		/*TextView textView1 = (TextView) layout.findViewById(R.id.textView1);
-		textView1.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				Log.d("tagteam","Test1");
-			}
-		});
-		
-		TextView textView2 = (TextView) layout.findViewById(R.id.textView2);
-		textView2.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				Log.d("tagteam","Test2");
-			}
-		});*/
-		 
-		
-		/*
 		 * Evenements composants du PopupWindow
 		 */
 		
@@ -780,40 +842,13 @@ public class MainActivity extends Activity
 				popupUserInfos.dismiss();
 			}
 		});
-		
-        // Ecouteur d'évènement sur le bouton pour fermer l'application
-		Button logout = (Button) layout.findViewById(R.id.btLogout);
-		logout.setOnClickListener(new OnClickListener() 
-		{
-			@Override
-			public void onClick(View v) 
-			{
-		        // Instance de SharedPreferences pour enregistrer des données dans un fichier
-		        SharedPreferences myPrefs = getSharedPreferences("UserPrefs", MODE_WORLD_READABLE); // Ici on permet donc la lecture de notre fichier de préférence à toutes les applications
-		        SharedPreferences.Editor prefsEditor = myPrefs.edit(); // Instance de l'editeur permettant d'écrire dans le fichier
-		        prefsEditor.putString("Email", null); // Données
-		        prefsEditor.putString("Password", null); // Données
-		        prefsEditor.commit(); // Valider les modifications
-		        
-		        popupUserInfos.dismiss();
-		        
-		        SharedVariables.displayAuthbox = true;
-		        
-		        // Redémarrer l'activité pour prendre en compte les modifications
-				Intent intent = getIntent();
-				finish();
-				startActivity(intent);
-
-		        
-			}
-		});
     }
     
     /**
      * Afficher une boite au milieu de la carte si aucun utilisateur est connectés
      * pour proposer a l'invité, de se connecter ou s'incrire aupres du service LTP.
      */
-    private void displayGuestPopup()
+    private void popupGuest()
     {
 		DisplayMetrics dm = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(dm);
@@ -886,109 +921,4 @@ public class MainActivity extends Activity
 			}
 		});
     }
-
-	/**
-	 * Méthode qui se déclenchera lorsque vous appuierez sur le bouton menu du téléphone
-	 */
-    public boolean onCreateOptionsMenu(Menu menu) 
-    {
-        // Création d'un MenuInflater qui va permettre d'instancier un Menu XML en un objet Menu
-        MenuInflater inflater = getMenuInflater();
-        
-        // Instanciation du menu XML spécifier en un objet Menu
-        inflater.inflate(R.menu.activity_main, menu);
-        
-        return true;
-     }
-    
-    /**
-     * Méthode qui se déclenchera au clic sur un item
-     */
-	public boolean onOptionsItemSelected(MenuItem item) 
-	{
-		// On regarde quel item a été cliqué grâce à son id et on déclenche une action
-		switch (item.getItemId()) 
-		{	
-		case R.id.menuSettings:
-    		Intent i = new Intent(MainActivity.this, UserPreferencesActivity.class);    
-    		startActivityForResult(i, 2);
-	        return true;
-		case R.id.menuExit:
-			finish();
-			return true;
-		}
-		return false;
-	}
-	
-	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data) 
-	{
-		super.onActivityResult(requestCode, resultCode, data);
-		
-		// Le code de requête est utilisé pour identifier l’activité enfant
-		switch (requestCode) 
-		{
-		// Cas si authentification
-		case 1:
-			switch (resultCode) 
-			{
-			case RESULT_OK:
-				Toast.makeText(this, "Authentification réussit !", Toast.LENGTH_LONG).show();
-				setup();
-				auth();
-				parseFriends();
-				return;
-			case RESULT_CANCELED:
-				Toast.makeText(this, "Authentification échouée !", Toast.LENGTH_LONG).show();
-				return;
-			default:
-				// Faire quelque chose
-				return;
-			}
-		
-		// Cas si paramètres utilisateur
-		case 2:
-			switch (resultCode) 
-			{
-			case RESULT_OK:
-				// On relance l'activité car on doit rafraichir la map !
-				finish();
-				startActivity(getIntent());
-				return;
-			case RESULT_CANCELED:
-				Toast.makeText(this, "Erreur lors de la modification des préférences !", Toast.LENGTH_LONG).show();
-				return;
-			default:
-				// Faire quelque chose
-				return;
-			}
-		
-		// Aucune activité en retour...
-		default:
-			// Faire quelque chose
-			return;
-		}
-	}
-	
-	// Get the x and y position after the button is draw on screen
-	// (It's important to note that we can't get the position in the onCreate(),
-	// because at that stage most probably the view isn't drawn yet, so it will
-	// return (0, 0))
-	@Override
-	public void onWindowFocusChanged(boolean hasFocus) 
-	{
-
-		int[] location = new int[2];
-		Button button = (Button) findViewById(R.id.buttonMyAccount);
-
-		// Get the x, y location and store it in the location[] array
-		// location[0] = x, location[1] = y.
-		if (button != null)
-			button.getLocationOnScreen(location);
-
-		// Initialize the Point with x, and y positions
-		p = new Point();
-		p.x = location[0];
-		p.y = location[1];
-	}
 }

@@ -29,15 +29,18 @@ public class SimpleSSLSocketFactory extends org.apache.http.conn.ssl.SSLSocketFa
 			// Create a trust manager that does not validate certificate chains and simply
 			// accept all type of certificates
 	                TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-	                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+	                @Override
+					public java.security.cert.X509Certificate[] getAcceptedIssuers() {
 	                        return new java.security.cert.X509Certificate[] {};
 	                }
  
-	                public void checkClientTrusted(X509Certificate[] chain, String authType) 
+	                @Override
+					public void checkClientTrusted(X509Certificate[] chain, String authType) 
 					throws CertificateException {
 	                }
  
-	                public void checkServerTrusted(X509Certificate[] chain, String authType) 
+	                @Override
+					public void checkServerTrusted(X509Certificate[] chain, String authType) 
 					throws CertificateException {
 	                }
 	        }};

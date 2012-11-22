@@ -15,41 +15,30 @@
         />
 
     <LinearLayout
+        android:id="@+id/linearLayoutInfos"
         android:layout_width="fill_parent"
-        android:layout_height="22dp"
+        android:layout_height="24dp"
+        android:alpha="0.8"
+        android:background="@drawable/bg_striped"
         android:gravity="right" >
 
         <Button
-            android:id="@+id/buttonMyAccount"
-            android:background="@drawable/ltp_icon_min"
+            android:id="@+id/btInfo"
             style="?android:attr/buttonStyleSmall"
-            android:layout_width="28dp"
-            android:layout_height="22dp"
-            android:text="" />
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:background="@drawable/ic_action_about" />
 
         <TextView
             android:id="@+id/textViewUserStatus"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginRight="5sp"
-            android:layout_weight="0.34"
-            android:paddingLeft="5pt"
-            android:text="Connexion error!>"
-            android:textSize="4pt" />
+            android:padding="5dp"
+            android:text="&lt;Message>"
+            android:textColor="#ffffff"
+            android:textSize="11sp" />
 
-        <Button
-            android:id="@+id/btSettings"
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="28dp"
-            android:layout_height="22dp"
-            android:background="@drawable/ic_menu_preferences" />
-
-        <Button
-            android:id="@+id/btTest"
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="28dp"
-            android:layout_height="22dp"
-            android:background="@drawable/ic_menu_mylocation" />
     </LinearLayout>
 
     <ScrollView

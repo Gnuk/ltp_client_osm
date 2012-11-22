@@ -17,7 +17,8 @@ public class LoginActivity extends Activity
 	Intent resultIntent;
     
     /** Called when the activity is first created. */
-    public void onCreate(Bundle savedInstanceState) 
+    @Override
+	public void onCreate(Bundle savedInstanceState) 
     {
         super.onCreate(savedInstanceState);
         
@@ -32,6 +33,7 @@ public class LoginActivity extends Activity
         Button boutonConnexion = (Button) findViewById(R.id.btnLogin);
         boutonConnexion.setOnClickListener(new View.OnClickListener()
         {
+			@Override
 			public void onClick(View v)
 			{
 				// Récupérer email et mot de passe
