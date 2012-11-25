@@ -1148,10 +1148,11 @@ containing a value of this type.
         public static final int abs__titleDivider=0x7f06001c;
         public static final int abs__up=0x7f06000b;
         public static final int btInfo=0x7f06003c;
+        public static final int btStatusPublish=0x7f06005c;
         public static final int btnLogin=0x7f060036;
-        public static final int btnPopupClose=0x7f060058;
-        public static final int btnPopupLogin=0x7f060057;
-        public static final int btnPopupSignup=0x7f060056;
+        public static final int btnPopupClose=0x7f060059;
+        public static final int btnPopupLogin=0x7f060058;
+        public static final int btnPopupSignup=0x7f060057;
         public static final int btnRegister=0x7f060049;
         public static final int close=0x7f060055;
         public static final int disableHome=0x7f060009;
@@ -1160,6 +1161,7 @@ containing a value of this type.
         public static final int fieldId=0x7f060047;
         public static final int fieldPassword=0x7f060035;
         public static final int fieldPasswordCheck=0x7f060048;
+        public static final int fieldUserStatus=0x7f06005b;
         public static final int header=0x7f060033;
         public static final int homeAsUp=0x7f060006;
         public static final int layoutMain=0x7f060039;
@@ -1167,11 +1169,13 @@ containing a value of this type.
         public static final int link_to_login=0x7f06004a;
         public static final int link_to_register=0x7f060037;
         public static final int listMode=0x7f060002;
-        public static final int menuExit=0x7f06005a;
-        public static final int menuSettings=0x7f060059;
+        public static final int menuExit=0x7f06005e;
+        public static final int menuSettings=0x7f06005d;
         public static final int normal=0x7f060001;
         public static final int openmapview=0x7f06003a;
-        public static final int popup=0x7f06004b;
+        public static final int popupAccount=0x7f06004b;
+        public static final int popupGuest=0x7f060056;
+        public static final int popupStatus=0x7f06005a;
         public static final int scrollViewFriendList=0x7f06003e;
         public static final int showCustom=0x7f060008;
         public static final int showHome=0x7f060005;
@@ -1231,8 +1235,9 @@ containing a value of this type.
         public static final int activity_signup=0x7f030019;
         public static final int popup_account=0x7f03001a;
         public static final int popup_guest=0x7f03001b;
-        public static final int sherlock_spinner_dropdown_item=0x7f03001c;
-        public static final int sherlock_spinner_item=0x7f03001d;
+        public static final int popup_set_status=0x7f03001c;
+        public static final int sherlock_spinner_dropdown_item=0x7f03001d;
+        public static final int sherlock_spinner_item=0x7f03001e;
     }
     public static final class menu {
         public static final int activity_main=0x7f0d0000;

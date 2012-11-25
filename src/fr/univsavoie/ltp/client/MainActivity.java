@@ -100,6 +100,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -129,7 +130,6 @@ public class MainActivity extends SherlockActivity
 	/* Variables de gestion */
 	private boolean displayAuthBox, displayUserInfos;
 	private String login;
-	private PopupWindow popupGuest, popupUserInfos;
 	
 	/* Variables constantes */
 	private ArrayList<OverlayItem> anotherOverlayItemArray;
@@ -214,10 +214,15 @@ public class MainActivity extends SherlockActivity
 
 		switch (item.getItemId()) 
 		{
-		// Quitter l'application
+		// Publier son status
 		case 0:
-			finish();
+			popupPublishStatus();
 			break;
+			
+		// Quitter l'application
+		case 99:
+			finish();
+			break;			
 
 		// Se refixer au dernier point localisé de l'utilisateur
 		case 1:
@@ -272,9 +277,11 @@ public class MainActivity extends SherlockActivity
 			{
 			case RESULT_OK:
 				Toast.makeText(this, "Authentification réussit !", Toast.LENGTH_LONG).show();
-				setup();
-				auth();
-				parseFriends();
+				//setup();
+				//auth();
+				//parseFriends();
+				finish();
+				startActivity(getIntent());
 				return;
 			case RESULT_CANCELED:
 				Toast.makeText(this, "Authentification échouée !", Toast.LENGTH_LONG).show();
@@ -405,11 +412,10 @@ public class MainActivity extends SherlockActivity
 				popupDisplayUserInfos();
     	
     	// On met a jours la barre infos de l'utilisateur
-    	TextView txtUserStatus = (TextView)findViewById(R.id.textViewUserStatus);
 		if (login == null)
-			txtUserStatus.setText("Salut, Etranger, connecte toi!");
+			infoBar("Salut, Etranger, connecte toi!", true);
 		else
-			txtUserStatus.setText("Salut, " + login + "! ");
+			infoBar("Salut, " + login + "! ", true);
 	}
 	
     /**
@@ -448,6 +454,18 @@ public class MainActivity extends SherlockActivity
 				lastLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 			}      
 			
+			if(lastLocation != null) 
+			{
+				// Update current location thanks to infos send by location manager
+				updateLoc(lastLocation);
+			}
+			else
+			{
+				// Set default GeoPoint
+				GeoPoint point2 = new GeoPoint(46.227638, 2.213749);
+				myMapController.setCenter(point2);
+			}  
+			
 			// Call for update user gps coordinates
 			updateUserGPSInfos(lastLocation);
 			
@@ -460,18 +478,6 @@ public class MainActivity extends SherlockActivity
 				// Appeler la fonction pour parser les amis et les affichés sur la carte
 				parseFriends();
 			}
-			
-			if(lastLocation != null) 
-			{
-				// Update current location thanks to infos send by location manager
-				updateLoc(lastLocation);
-			}
-			else
-			{
-				// Set default GeoPoint
-				GeoPoint point2 = new GeoPoint(46.227638, 2.213749);
-				myMapController.setCenter(point2);
-			}  
 			
 			//Add Scale Bar
 			//ScaleBarOverlay myScaleBarOverlay = new ScaleBarOverlay(this);
@@ -915,14 +921,14 @@ public class MainActivity extends SherlockActivity
 		//int popupHeight = height / 2;
 		
 		// Inflate the popup_layout.xml
-		LinearLayout viewGroup = (LinearLayout) this.findViewById(R.id.popup);
+		LinearLayout viewGroup = (LinearLayout) this.findViewById(R.id.popupAccount);
 		LayoutInflater layoutInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		
 		final View layout = layoutInflater.inflate(R.layout.popup_account,viewGroup);		
 		layout.setBackgroundResource(R.drawable.popup_gradient);
 
 		// Créer le PopupWindow
-		popupUserInfos = new PopupWindow(layout, popupWidth, LayoutParams.WRAP_CONTENT, true);
+		final PopupWindow popupUserInfos = new PopupWindow(layout, popupWidth, LayoutParams.WRAP_CONTENT, true);
 		popupUserInfos.setBackgroundDrawable(new BitmapDrawable());
 		popupUserInfos.setOutsideTouchable(true);
 
@@ -956,6 +962,78 @@ public class MainActivity extends SherlockActivity
     }
     
     /**
+     * Afficher sur la map un popup qui propose a l'utilisateur
+     * de mettre a jours son status
+     */
+    private void popupPublishStatus()
+    {
+		DisplayMetrics dm = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(dm);
+
+		//final int height = dm.heightPixels;
+		final int width = dm.widthPixels;
+		
+		int popupWidth = width / 2;
+		//int popupHeight = height / 2;
+		
+		// Inflate the popup_layout.xml
+		ScrollView viewGroup = (ScrollView) this.findViewById(R.id.popupStatus);
+		LayoutInflater layoutInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		
+		final View layout = layoutInflater.inflate(R.layout.popup_set_status,viewGroup);		
+		layout.setBackgroundResource(R.drawable.popup_gradient);
+
+		// Créer le PopupWindow
+		final PopupWindow popupPublishStatus = new PopupWindow(layout, popupWidth, LayoutParams.WRAP_CONTENT, true);
+		popupPublishStatus.setBackgroundDrawable(new BitmapDrawable());
+		popupPublishStatus.setOutsideTouchable(true);
+
+		// Some offset to align the popup a bit to the right, and a bit down, relative to button's position.
+		final int OFFSET_X = 0;
+		final int OFFSET_Y = 0;
+
+		// Displaying the popup at the specified location, + offsets.
+		findViewById(R.id.layoutMain).post(new Runnable() 
+		{
+			@Override
+			public void run() 
+			{
+				popupPublishStatus.showAtLocation(layout, Gravity.CENTER, OFFSET_X, OFFSET_Y);
+			}
+		});
+		
+		/*
+		 * Evenements composants du PopupWindow
+		 */
+
+        // Ecouteur d'évènement sur le bouton pour se déconnecter
+		Button publish = (Button) layout.findViewById(R.id.btStatusPublish);
+		publish.setOnClickListener(new OnClickListener() 
+		{
+			@Override
+			public void onClick(View v) 
+			{
+				EditText userStatus = (EditText) layout.findViewById(R.id.fieldUserStatus);				
+				if (userStatus.getText().toString().length() == 0 ) 
+				{
+					Toast.makeText(MainActivity.this, "Impossible de publié ton status !", Toast.LENGTH_LONG).show();
+					popupPublishStatus.dismiss();
+				} 
+				else if (userStatus.getText().toString().length() < 3 ) 
+				{
+					Toast.makeText(MainActivity.this, "Impossible de publié ton status !", Toast.LENGTH_LONG).show();
+					popupPublishStatus.dismiss();
+				}
+				else
+				{
+					Toast.makeText(MainActivity.this, "Status mise a jours !", Toast.LENGTH_LONG).show();
+					popupPublishStatus.dismiss();
+				}
+			}
+		});
+    }
+    
+    /**
      * Afficher une boite au milieu de la carte si aucun utilisateur est connectés
      * pour proposer a l'invité, de se connecter ou s'incrire aupres du service LTP.
      */
@@ -971,14 +1049,14 @@ public class MainActivity extends SherlockActivity
 		//int popupHeight = height / 2;
 		
 		// Inflate the popup_layout.xml
-		LinearLayout viewGroup = (LinearLayout) this.findViewById(R.id.popup);
+		LinearLayout viewGroup = (LinearLayout) this.findViewById(R.id.popupGuest);
 		LayoutInflater layoutInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		
 		final View layout = layoutInflater.inflate(R.layout.popup_guest,viewGroup);		
 		layout.setBackgroundResource(R.drawable.popup_gradient);
 
 		// Créer le PopupWindow
-		popupGuest = new PopupWindow(layout, popupWidth, LayoutParams.WRAP_CONTENT, true);
+		final PopupWindow popupGuest = new PopupWindow(layout, popupWidth, LayoutParams.WRAP_CONTENT, true);
 		popupGuest.setBackgroundDrawable(new BitmapDrawable());
 		popupGuest.setOutsideTouchable(true);
 
