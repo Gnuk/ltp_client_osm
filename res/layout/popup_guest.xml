@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="2pt"
-        android:text="Que voulez vous faire ?"
+        android:text="Salut! Que veux tu faire?"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#ffffff"
         android:textSize="5pt" />
@@ -27,7 +27,7 @@
             android:layout_height="wrap_content" >
 
             <Button
-                android:id="@+id/buttonCreateAccount"
+                android:id="@+id/btnPopupSignup"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.84"
@@ -40,7 +40,7 @@
             android:layout_height="wrap_content" >
 
             <Button
-                android:id="@+id/buttonConnexion"
+                android:id="@+id/btnPopupLogin"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.84"
@@ -61,7 +61,7 @@
     </TableLayout>
 
     <Button
-        android:id="@+id/close"
+        android:id="@+id/btnPopupClose"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"

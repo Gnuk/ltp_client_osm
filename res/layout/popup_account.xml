@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="2pt"
-        android:text="Vos Informations"
+        android:text="T&apos;es dernières informations"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#ffffff"
         android:textSize="5pt" />

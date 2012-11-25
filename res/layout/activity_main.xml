@@ -17,7 +17,7 @@
     <LinearLayout
         android:id="@+id/linearLayoutInfos"
         android:layout_width="fill_parent"
-        android:layout_height="24dp"
+        android:layout_height="28dp"
         android:alpha="0.8"
         android:background="@drawable/bg_striped"
         android:gravity="right" >
@@ -25,8 +25,8 @@
         <Button
             android:id="@+id/btInfo"
             style="?android:attr/buttonStyleSmall"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
             android:background="@drawable/ic_action_about" />
 
         <TextView

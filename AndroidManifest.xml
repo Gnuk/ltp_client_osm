@@ -19,8 +19,8 @@
     <application
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-
-        android:theme="@style/Theme.Sherlock"
+		android:theme="@style/Theme.ltp"
+       
         >
         <activity
             android:name=".MainActivity"
@@ -34,6 +34,7 @@
         </activity>
         
         <activity android:name=".SettingsActivity"></activity>
+        <activity android:name=".SignupActivity"></activity>
         <activity android:name=".LoginActivity"></activity>
         <activity android:name=".UserPreferencesActivity"></activity>
         

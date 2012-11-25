@@ -1,15 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--<style name="AppTheme" parent="android:Theme.Light" />-->
-<style name="Theme.Styled" parent="Theme.Sherlock.Light.DarkActionBar">
-    <item name="actionBarStyle">@style/Widget.Styled.ActionBar</item>
-    <item name="android:actionBarStyle">@style/Widget.Styled.ActionBar</item>
-</style>
-
-<style name="Widget.Styled.ActionBar" parent="Widget.Sherlock.Light.ActionBar.Solid.Inverse">
-    <item name="background">@drawable/bg_striped</item>
-    <item name="android:background">@drawable/bg_striped</item>
-    <item name="backgroundSplit">@drawable/bg_striped_split</item>
-    <item name="android:backgroundSplit">@drawable/bg_striped_split</item>
-</style>
-
+    
+    <!-- <style name="AppTheme" parent="android:Theme.Light" /> -->
+    
+    <!-- ######################################################## -->
+    <!-- DECLARATION DU STYLE POUR L'ACTIONBAR DE LA LIB SHERLOCK -->
+    <!-- ######################################################## -->
+    
+    <style name="Theme.Styled" parent="Theme.Sherlock.Light.DarkActionBar">
+        <item name="actionBarStyle">@style/Widget.Styled.ActionBar</item>
+        <item name="android:actionBarStyle">@style/Widget.Styled.ActionBar</item>
+    </style>
+    
+    <style name="Widget.Styled.ActionBar" parent="Widget.Sherlock.Light.ActionBar.Solid.Inverse">
+        <item name="background">@drawable/bg_striped</item>
+        <item name="android:background">@drawable/bg_striped</item>
+        <item name="backgroundSplit">@drawable/bg_striped_split</item>
+        <item name="android:backgroundSplit">@drawable/bg_striped_split</item>
+    </style>
+    
+    <!-- ############################################################# -->
+    <!-- DECLARATION DU STYLE POUR L'IDENTITE VISUEL DE LOCALIZETEAPOT -->
+    <!-- ############################################################# -->
+    
+    <style name="Theme.ltp" parent="Theme.Sherlock.Light">
+        <item name="android:editTextStyle">@style/EditTextltp</item>
+        <item name="android:autoCompleteTextViewStyle">@style/AutoCompleteTextViewltp</item>
+        <item name="android:checkboxStyle">@style/CheckBoxltp</item>
+        <item name="android:radioButtonStyle">@style/RadioButtonltp</item>
+        <item name="android:buttonStyle">@style/Buttonltp</item>
+        <item name="android:imageButtonStyle">@style/ImageButtonltp</item>
+        <item name="android:spinnerStyle">@style/Spinnerltp</item>
+        <item name="android:dropDownSpinnerStyle">@style/Spinnerltp.DropDown</item>
+        <item name="android:spinnerDropDownItemStyle">@style/SpinnerDropDownItemltp</item>
+        <item name="android:progressBarStyleHorizontal">@style/ProgressBarltp</item>
+        <item name="android:seekBarStyle">@style/SeekBarltp</item>
+        <item name="android:ratingBarStyle">@style/RatingBarltp</item>
+        <item name="android:ratingBarStyleIndicator">@style/RatingBarBigltp</item>
+        <item name="android:ratingBarStyleSmall">@style/RatingBarSmallltp</item>
+        <item name="android:buttonStyleToggle">@style/Toggleltp</item>
+        <item name="android:listViewStyle">@style/ListViewltp</item>
+        <item name="android:listViewWhiteStyle">@style/ListViewltp.White</item>
+        <item name="android:spinnerItemStyle">@style/SpinnerItemltp</item>
+    </style>
+    
 </resources>

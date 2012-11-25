@@ -9,6 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
@@ -63,7 +64,9 @@ import com.actionbarsherlock.view.SubMenu;
 import fr.univsavoie.ltp.client.tools.SharedVariables;
 import fr.univsavoie.ltp.client.tools.SimpleSSLSocketFactory;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -72,6 +75,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -85,7 +90,14 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -148,6 +160,8 @@ public class MainActivity extends SherlockActivity
         
         // Initialiser tout ce qui est données utilisateur propres a l'activité
         init();
+        
+        
     }
     
 	// Création d'un menu contenant un bouton rafraichir et un menu déroulant
@@ -163,12 +177,26 @@ public class MainActivity extends SherlockActivity
 		menu.add(0, 3, 2, "Rafraichir la carte").setIcon(R.drawable.ic_1_navigation_refresh)
 		.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
 		
-		SubMenu sub = menu.addSubMenu(0, 4, 3, "Mon compte");
-		sub.add(0, 5, 4, "Afficher mes informations");
-		sub.add(0, 6, 5, "Se déconnecter");
-		sub.getItem().setShowAsAction(
-				MenuItem.SHOW_AS_ACTION_IF_ROOM
-						| MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+		// Afficher le menu selon si utilisateur connecté ou pas
+		
+		if (login != null) 
+		{
+			menu.add(0, 0, 0, "Publier un status").setIcon(R.drawable.ic_6_social_chat)
+			.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+			
+			SubMenu sub = menu.addSubMenu(0, 10, 3, "Mon compte");
+			sub.add(0, 11, 4, "Afficher mes informations");
+			sub.add(0, 12, 5, "Se déconnecter");
+			sub.getItem().setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+		} 
+		else 
+		{
+			SubMenu sub = menu.addSubMenu(0, 20, 6, "Mon compte");
+			sub.add(0, 21, 7, "S'inscrire");
+			sub.add(0, 22, 8, "Se connecter");
+			sub.getItem().setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+		}
+
 		return true;
 	}
 
@@ -180,31 +208,50 @@ public class MainActivity extends SherlockActivity
 		if (item.getTitle().toString().compareTo(getTitle().toString()) == 0)
 			finish();
 		
+		Log.d("Watch", "LOGIN: " + login);
+
 		Log.d("Watch", String.valueOf(item.getItemId()));
-		
+
 		switch (item.getItemId()) 
 		{
 		// Quitter l'application
 		case 0:
 			finish();
 			break;
-			
-		// Se refixer au dernier point localisé de l'utilisateur	
+
+		// Se refixer au dernier point localisé de l'utilisateur
 		case 1:
 			updateLoc(lastLocation);
-			break;			
+			break;
 
 		// Afficher les préférences
 		case 2:
-    		Intent i = new Intent(MainActivity.this, UserPreferencesActivity.class);    
-    		startActivityForResult(i, 2);
+			Intent i = new Intent(MainActivity.this, UserPreferencesActivity.class);
+			startActivityForResult(i, 2);
+			break;
+
+		// Inscrire l'utilisateur
+		case 21:
+			Intent j = new Intent(MainActivity.this, SignupActivity.class);
+			startActivityForResult(j, 3);
 			break;
 			
-		// Déconnecter l'utilisateur actif
-		case 6:
-			userLogout();
+		// Connecter l'utilisateur
+		case 22:
+			Intent k = new Intent(MainActivity.this, LoginActivity.class);
+			startActivityForResult(k, 1);
+			break;
+			
+		// Afficher les dernieres infos de l'utilisateur connecté
+		case 11:
+			popupDisplayUserInfos();
 			break;			
 			
+		// Déconnecter l'utilisateur actif
+		case 12:
+			userLogout();
+			break;
+
 		default:
 			break;
 		}
@@ -215,7 +262,7 @@ public class MainActivity extends SherlockActivity
 	public void onActivityResult(int requestCode, int resultCode, Intent data) 
 	{
 		super.onActivityResult(requestCode, resultCode, data);
-		
+
 		// Le code de requête est utilisé pour identifier l’activité enfant
 		switch (requestCode) 
 		{
@@ -236,7 +283,7 @@ public class MainActivity extends SherlockActivity
 				// Faire quelque chose
 				return;
 			}
-		
+
 		// Cas si paramètres utilisateur
 		case 2:
 			switch (resultCode) 
@@ -253,8 +300,23 @@ public class MainActivity extends SherlockActivity
 				// Faire quelque chose
 				return;
 			}
-		
-		// Aucune activité en retour...
+
+		// Cas si inscription
+		case 3:
+			switch (resultCode) 
+			{
+			case RESULT_OK:
+				Toast.makeText(this, "Inscription réussit : vous pouvez vous authentifier !", Toast.LENGTH_LONG).show();
+				return;
+			case RESULT_CANCELED:
+				Toast.makeText(this, "Echec lors de l'inscription: verifier vos paramètres de connexion réseau !", Toast.LENGTH_LONG).show();
+				return;
+			default:
+				// Faire quelque chose
+				return;
+			}
+
+			// Aucune activité en retour...
 		default:
 			// Faire quelque chose
 			return;
@@ -293,11 +355,11 @@ public class MainActivity extends SherlockActivity
     {
 		if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
 		{
-			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, myLocationListener);
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 1, myLocationListener);
 		} 
 		else if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
 		{
-			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, myLocationListener);
+			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 1, myLocationListener);
 		}
 		 
 		super.onResume();
@@ -384,6 +446,19 @@ public class MainActivity extends SherlockActivity
 				lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 			} else if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
 				lastLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+			}      
+			
+			// Call for update user gps coordinates
+			updateUserGPSInfos(lastLocation);
+			
+			// Connecter l'utilisateur et parser ses amis
+			if (login != null)
+			{
+				// Appeler la fonction pour s'authentifier auprès du service LTP
+				auth();
+				
+				// Appeler la fonction pour parser les amis et les affichés sur la carte
+				parseFriends();
 			}
 			
 			if(lastLocation != null) 
@@ -396,20 +471,7 @@ public class MainActivity extends SherlockActivity
 				// Set default GeoPoint
 				GeoPoint point2 = new GeoPoint(46.227638, 2.213749);
 				myMapController.setCenter(point2);
-			}        
-			
-			// Call for update user gps coordinates
-			updateUserInterface(lastLocation);
-			
-			// Connecter l'utilisateur et parser ses amis
-			if (login != null)
-			{
-				// Appeler la fonction pour s'authentifier auprès du service LTP
-				auth();
-				
-				// Appeler la fonction pour parser les amis et les affichés sur la carte
-				parseFriends();
-			}
+			}  
 			
 			//Add Scale Bar
 			//ScaleBarOverlay myScaleBarOverlay = new ScaleBarOverlay(this);
@@ -425,6 +487,42 @@ public class MainActivity extends SherlockActivity
         {
         	Log.e("Catch", "> onCreate() - Exception : " + e.getMessage());
 		}
+    }
+    
+    /**
+     * La barre d'infos qui se situe après l'action bar
+     */
+    public void infoBar(String pMessage, boolean isVisible)
+    {
+    	// On définit le message a afficher
+    	TextView msg = (TextView)findViewById(R.id.textViewUserStatus);
+    	msg.setText(pMessage);
+    	
+    	// On charge le linearLayout ou on affiche la barre d'infos
+		LinearLayout layoutInfos = (LinearLayout) findViewById(R.id.linearLayoutInfos);
+		
+		// On lance une nouvelle animation pour afficher et faire disparaitre la barre
+		Animation animationFadeInOut = AnimationUtils.loadAnimation(MainActivity.this, R.anim.fade_in_out);
+		layoutInfos.startAnimation(animationFadeInOut);
+		
+		/*int fadeInDuration = 3500; // Configure time values here
+	    int timeBetween = 5000;
+	    int fadeOutDuration = 3500;
+		
+		Animation fadeIn = new AlphaAnimation(0, 1);
+	    fadeIn.setInterpolator(new DecelerateInterpolator()); // add this
+	    fadeIn.setDuration(fadeInDuration);
+
+	    Animation fadeOut = new AlphaAnimation(1, 0);
+	    fadeOut.setInterpolator(new AccelerateInterpolator()); // and this
+	    fadeOut.setStartOffset(fadeInDuration + timeBetween);
+	    fadeOut.setDuration(fadeOutDuration);
+
+	    AnimationSet animation = new AnimationSet(false); // change to false
+	    animation.addAnimation(fadeIn);
+	    animation.addAnimation(fadeOut);
+	    //animation.setRepeatCount(0);
+	    layoutInfos.setAnimation(animation);*/
     }
     
     /**
@@ -655,7 +753,7 @@ public class MainActivity extends SherlockActivity
 			
 			myOpenMapView.invalidate();
 			
-			updateUserInterface(loc);
+			updateUserGPSInfos(loc);
 		} 
         catch (Exception e) 
         {
@@ -663,20 +761,33 @@ public class MainActivity extends SherlockActivity
 		}
     }
 	
-	private void updateUserInterface(Location loc)
+	/**
+	 * On met a jours les infos utilisateurs de sa situation géographique dans
+	 * les divers affichages de l'application.
+	 * @param loc Coordonnées GPS lat et long.
+	 */
+	private void updateUserGPSInfos(Location loc)
 	{
     	try
     	{
 			// Update user localization coordinates
-			TextView myLocationText = (TextView)findViewById(R.id.textViewUserStatus);
 			String latLongString = "";
-			if (loc != null) {
+			if (loc != null) 
+			{
 			    double lat = loc.getLatitude();
 			    double lng = loc.getLongitude();
 			    latLongString = "Lat:" + lat + ", Long:" + lng;
-			    myLocationText.setText("Vos coordonnées GPS: " + latLongString);
-			} else {
-			    myLocationText.setText("Votre position actuel n'a pas été trouvé !");
+			    
+				Geocoder gcd = new Geocoder(this, Locale.getDefault());
+				List<Address> addresses = gcd.getFromLocation(lat, lng, 1);
+				if (addresses.size() > 0) 
+				    System.out.println(addresses.get(0).getLocality());
+			    
+			    infoBar("T'es localisé: " + addresses.get(0).getLocality(), true);
+			} 
+			else 
+			{
+				infoBar("Ta position actuel n'a pas été trouvé !" + latLongString, true);
 			}
 			
 		} 
@@ -890,7 +1001,7 @@ public class MainActivity extends SherlockActivity
 		 */
 		
         // Ecouteur d'évènement sur le bouton des paramètres
-        Button btLogin = (Button) layout.findViewById(R.id.buttonConnexion);
+        Button btLogin = (Button) layout.findViewById(R.id.btnPopupLogin);
         btLogin.setOnClickListener(new OnClickListener() 
         {
         	@Override
@@ -900,18 +1011,39 @@ public class MainActivity extends SherlockActivity
         		//startActivity(intent);
         		SharedVariables.displayAuthbox = false;
         		
-        		popupGuest.dismiss();
-        		
         		// La constante CODE_MON_ACTIVITE représente l’identifiant de la requête
         		// (requestCode) qui sera utilisé plus tard pour identifier l’activité
         		// renvoyant la valeur de retour.
         		Intent i = new Intent(MainActivity.this, LoginActivity.class);    
         		startActivityForResult(i, 1);
+        		
+        		popupGuest.dismiss();
             }
         });
+        
+        // Ecouteur d'évènement sur le bouton des paramètres
+        Button btSignup = (Button) layout.findViewById(R.id.btnPopupSignup);
+        btSignup.setOnClickListener(new OnClickListener() 
+        {
+        	@Override
+            public void onClick(View view) 
+            {
+        		//Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        		//startActivity(intent);
+        		SharedVariables.displayAuthbox = false;
+        		
+        		// La constante CODE_MON_ACTIVITE représente l’identifiant de la requête
+        		// (requestCode) qui sera utilisé plus tard pour identifier l’activité
+        		// renvoyant la valeur de retour.
+        		Intent i = new Intent(MainActivity.this, SignupActivity.class);    
+        		startActivityForResult(i, 3);
+        		
+        		popupGuest.dismiss();
+            }
+        });        
 
         // Ecouteur d'évènement sur le bouton pour fermer l'application
-		Button close = (Button) layout.findViewById(R.id.close);
+		Button close = (Button) layout.findViewById(R.id.btnPopupClose);
 		close.setOnClickListener(new OnClickListener() 
 		{
 			@Override

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#E9E7FE"
+    android:fillViewport="true" >
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:alpha="0.8"
+        android:background="#fff" >
+
+        <!-- Header  Starts -->
+
+        <LinearLayout
+            android:id="@+id/header"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/header_gradient"
+            android:padding="5dp" >
+
+            <!-- Logo Start -->
+
+            <TextView
+                android:id="@+id/textViewConnexion"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="0.92"
+                android:paddingLeft="2dp"
+                android:paddingTop="6dp"
+                android:text="Inscription"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#ECF5FB"
+                android:textSize="20dp" />
+
+            <!-- Logo Ends -->
+
+            <ImageView
+                android:layout_width="42dp"
+                android:layout_height="34dp"
+                android:layout_marginLeft="10dip"
+                android:maxHeight="69dp"
+                android:maxWidth="95dp"
+                android:src="@drawable/ltp_icon_min" />
+
+        </LinearLayout>
+        <!-- Header Ends -->
+        <!-- Footer Start -->
+        <!-- Footer Ends -->
+
+
+        <!-- Registration Form -->
+
+        <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/header"
+            android:background="#E9E7FE"
+            android:orientation="vertical"
+            android:padding="10dip" >
+
+            <!-- Full Name Label -->
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Identifiant"
+                android:textColor="#372c24" />
+
+            <EditText
+                android:id="@+id/fieldId"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dip"
+                android:layout_marginTop="5dip"
+                android:singleLine="true" />
+
+            <!-- Email Label -->
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Email"
+                android:textColor="#372c24" />
+
+            <EditText
+                android:id="@+id/fieldEmail"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dip"
+                android:layout_marginTop="5dip"
+                android:singleLine="true" />
+
+            <!-- Password Label -->
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Password"
+                android:textColor="#372c24" />
+
+            <EditText
+                android:id="@+id/fieldPassword"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dip"
+                android:layout_marginTop="5dip"
+                android:password="true"
+                android:singleLine="true" />
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Password vérification"
+                android:textColor="#372c24" />
+
+            <EditText
+                android:id="@+id/fieldPasswordCheck"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dip"
+                android:layout_marginTop="5dip"
+                android:password="true"
+                android:singleLine="true" />
+
+            <!-- Register Button -->
+
+            <Button
+                android:id="@+id/btnRegister"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dip"
+                android:text="Register New Account" />
+
+            <!-- Link to Login Screen -->
+
+            <TextView
+                android:id="@+id/link_to_login"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="40dip"
+                android:layout_marginTop="40dip"
+                android:gravity="center"
+                android:text="Deja membre ? Connecte toi !"
+                android:textColor="#025f7c"
+                android:textSize="20dip" />
+        </LinearLayout>
+        <!-- Registration Form Ends -->
+    </RelativeLayout>
+
+</ScrollView>

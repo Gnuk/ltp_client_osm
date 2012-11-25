@@ -10,45 +10,8 @@
         android:background="#ffffff" >
 
         <!-- Header  Starts -->
-
-        <LinearLayout
-            android:id="@+id/header"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/header_gradient"
-            android:paddingBottom="5dip"
-            android:paddingTop="5dip" >
-
-            <!-- Logo Start -->
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dip"
-                android:src="@drawable/ltp_icon_min" />
-
-            <TextView
-                android:id="@+id/textViewConnexion"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_weight="0.92"
-                android:paddingLeft="10pt"
-                android:paddingTop="5pt"
-                android:text="Connexion"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textSize="15pt" />
-            <!-- Logo Ends -->
-        </LinearLayout>
         <!-- Header Ends -->
         <!-- Footer Start -->
-
-        <LinearLayout
-            android:id="@+id/footer"
-            android:layout_width="fill_parent"
-            android:layout_height="90dip"
-            android:layout_alignParentBottom="true"
-            android:background="@drawable/footer_gradient" >
-        </LinearLayout>
         <!-- Footer Ends -->
 
 
@@ -58,7 +21,9 @@
             xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/header"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@+id/header"
+            android:background="#E9E7FE"
             android:orientation="vertical"
             android:padding="10dip" >
 
@@ -104,8 +69,52 @@
                 android:text="Login" />
             <!-- Link to Registration Screen -->
 
+          <TextView
+              android:id="@+id/link_to_register"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginBottom="40dip"
+              android:layout_marginTop="40dip"
+              android:gravity="center"
+              android:text="T&apos;es nouveau ? Inscrit toi ici !"
+              android:textColor="#0b84aa"
+              android:textSize="20dip" />
+
         </LinearLayout>
         <!-- Login Form Ends -->
+
+        <LinearLayout
+            android:id="@+id/header"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:alpha="0.8"
+            android:background="@drawable/header_gradient"
+            android:padding="5dp" >
+
+            <TextView
+                android:id="@+id/textViewConnexion"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="0.92"
+                android:paddingLeft="2dp"
+                android:paddingTop="6dp"
+                android:text="Connexion"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#ECF5FB"
+                android:textSize="20dp" />
+
+            <ImageView
+                android:layout_width="42dp"
+                android:layout_height="34dp"
+                android:layout_marginLeft="10dip"
+                android:maxHeight="69dp"
+                android:maxWidth="95dp"
+                android:src="@drawable/ltp_icon_min" />
+
+        </LinearLayout>
+
     </RelativeLayout>
 
 </ScrollView>
