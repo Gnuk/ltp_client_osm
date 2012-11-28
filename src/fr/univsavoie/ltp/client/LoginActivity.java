@@ -1,6 +1,5 @@
 package fr.univsavoie.ltp.client;
 
-import fr.univsavoie.ltp.client.tools.SharedVariables;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -23,12 +22,8 @@ public class LoginActivity extends Activity
         super.onCreate(savedInstanceState);
         
         // Create settings activity
-        setContentView(R.layout.activity_login);
-        
-        // Mise a jours pour dire de ne plus affiché la popup de connexion
-        
-        SharedVariables.displayAuthbox = false;
-        
+        setContentView(R.layout.activity_login);      
+             
         // Ecouteur d'évènement sur le bouton de connexion
         Button boutonConnexion = (Button) findViewById(R.id.btnLogin);
         boutonConnexion.setOnClickListener(new View.OnClickListener()

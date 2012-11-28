@@ -32,7 +32,7 @@
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="Email"
+                android:text="@string/email"
                 android:textColor="#372c24" />
 
             <EditText
@@ -48,7 +48,7 @@
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="Password"
+                android:text="@string/password"
                 android:textColor="#372c24" />
 
             <EditText
@@ -66,7 +66,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dip"
-                android:text="Login" />
+                android:text="@string/submit_login" />
             <!-- Link to Registration Screen -->
 
           <TextView
@@ -76,7 +76,7 @@
               android:layout_marginBottom="40dip"
               android:layout_marginTop="40dip"
               android:gravity="center"
-              android:text="T&apos;es nouveau ? Inscrit toi ici !"
+              android:text="@string/slogan_signup"
               android:textColor="#0b84aa"
               android:textSize="20dip" />
 
@@ -100,7 +100,7 @@
                 android:layout_weight="0.92"
                 android:paddingLeft="2dp"
                 android:paddingTop="6dp"
-                android:text="Connexion"
+                android:text="@string/login_title"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:textColor="#ECF5FB"
                 android:textSize="20dp" />

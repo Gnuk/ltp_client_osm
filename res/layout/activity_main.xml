@@ -42,74 +42,80 @@
     </LinearLayout>
 
     <ScrollView
-        android:id="@+id/scrollViewFriendList"
-        android:layout_width="fill_parent"
-        android:layout_height="178dp"
-        android:layout_gravity="bottom"
-        android:layout_margin="5dp" >
+        android:id="@+id/scrollViewMapFilters"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:layout_margin="5dp"
+        android:paddingTop="25dp" >
 
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:orientation="vertical" >
+		<TableLayout
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:layout_weight="1" >
 
-            <TextView
-                android:id="@+id/textView1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Jean"
-                android:textAppearance="?android:attr/textAppearanceLarge" />
-            
-                <TextView
-                android:id="@+id/textView2"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="Marc"
-                android:textAppearance="?android:attr/textAppearanceLarge" />
-                
-                <TextView
-                android:id="@+id/textView3"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="Paul"
-                android:textAppearance="?android:attr/textAppearanceLarge" />
+		    <TableRow
+		        android:id="@+id/tableRow1"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content" >
 
-                                <TextView
-                android:id="@+id/textView4"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="Alex"
-                android:textAppearance="?android:attr/textAppearanceLarge" />
-                                
-                                                <TextView
-                android:id="@+id/textView5"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="Marie"
-                android:textAppearance="?android:attr/textAppearanceLarge" />
-                                                
-                                                                <TextView
-                android:id="@+id/textView6"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="Ami6"
-                android:textAppearance="?android:attr/textAppearanceLarge" />
-                                                                
-                                                                <TextView
-                android:id="@+id/textView7"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="Bob"
-                android:textAppearance="?android:attr/textAppearanceLarge" />                                                                
+		        <EditText
+		            android:id="@+id/editDestination"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_weight="1"
+		            android:hint="@string/destination"
+		            android:windowSoftInputMode="stateHidden" >
+		        </EditText>
 
-                                                                <TextView
-                android:id="@+id/textView8"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="Benjamin"
-                android:textAppearance="?android:attr/textAppearanceLarge" />
-                                                                                                                                
-        </LinearLayout>
+		        <Button
+		            android:id="@+id/buttonSearch"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_weight="0"
+		            android:text="Search" />
+
+		    </TableRow>
+
+		    <TableRow
+		        android:id="@+id/tableRow3"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content" >
+
+		        <AutoCompleteTextView
+		            android:id="@+id/poiTag"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_weight="1"
+		            android:completionThreshold="1"
+		            android:hint="Point d'interet"
+		            android:windowSoftInputMode="stateHidden" />
+
+		        <Button
+		            android:id="@+id/buttonSetPOITag"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_weight="0"
+		            android:text="Search" />
+
+		    </TableRow>
+
+		</TableLayout>
+        
     </ScrollView>
+    
+     <ListView
+         android:id="@+id/listViewFriends"
+         android:layout_width="200dp"
+         android:layout_height="100dp"
+         android:layout_gravity="bottom"
+         android:layout_margin="5dp"
+         android:alpha="0.7"
+         android:scrollbars="vertical" 
+         android:divider="@android:color/transparent"
+	  	 android:dividerHeight="8sp"
+         >
+
+     </ListView>  
 
 </FrameLayout>

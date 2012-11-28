@@ -2,7 +2,6 @@ package fr.univsavoie.ltp.client;
 
 import com.actionbarsherlock.app.SherlockActivity;
 
-import fr.univsavoie.ltp.client.tools.SharedVariables;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -26,10 +25,6 @@ public class SignupActivity extends Activity
         
         // Create settings activity
         setContentView(R.layout.activity_signup);
-        
-        // Mise a jours pour dire de ne plus affiché la popup de connexion
-        
-        SharedVariables.displayAuthbox = false;
         
         // Ecouteur d'évènement sur le bouton de connexion
         Button btRegister = (Button) findViewById(R.id.btnRegister);

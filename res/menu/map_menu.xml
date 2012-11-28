@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item
+        android:id="@+id/menu_departure"
+        android:title="@+string/departure"/>
+    <item
+        android:id="@+id/menu_destination"
+        android:title="@+string/destination"/>
+    <item
+        android:id="@+id/menu_viapoint"
+        android:title="@+string/via_point"/>
+    <item
+        android:id="@+id/menu_none"
+        android:title="@+string/cancel"/>
+</menu>

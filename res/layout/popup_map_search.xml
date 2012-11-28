@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/popupMapSearch"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" 
+    android:background="@drawable/popup_bg" >
+    
+        <TextView
+            android:id="@+id/textViewTitle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="2pt"
+            android:text="Recherche sur la carte"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="#ffffff"
+            android:textSize="5pt" />
+        
+		<TableLayout
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:layout_weight="1" >
+
+		    <TableRow
+		        android:id="@+id/tableRow1"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content" >
+
+		        <EditText
+		            android:id="@+id/editDestination"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_weight="1"
+		            android:hint="@string/destination"
+		            android:windowSoftInputMode="stateHidden" >
+		        </EditText>
+
+		        <Button
+		            android:id="@+id/btMapSearchDestination"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_weight="0"
+		            android:text="Search" />
+
+		    </TableRow>
+
+		    <TableRow
+		        android:id="@+id/tableRow3"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content" >
+
+		        <AutoCompleteTextView
+		            android:id="@+id/poiTag"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_weight="1"
+		            android:completionThreshold="1"
+		            android:hint="Point d'interet"
+		            android:windowSoftInputMode="stateHidden" />
+
+		        <Button
+		            android:id="@+id/btMapSearchPOI"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_weight="0"
+		            android:text="Search" />
+
+		    </TableRow>
+
+		</TableLayout>
+</LinearLayout>
