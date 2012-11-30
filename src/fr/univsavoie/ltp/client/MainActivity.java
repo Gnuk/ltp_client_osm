@@ -1,52 +1,15 @@
 package fr.univsavoie.ltp.client;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.apache.http.HttpException;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.HttpVersion;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.AuthState;
-import org.apache.http.auth.Credentials;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.protocol.ClientContext;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.params.HttpProtocolParams;
-import org.apache.http.protocol.ExecutionContext;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.protocol.HttpContext;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osmdroid.DefaultResourceProxyImpl;
-import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.bonuspack.location.FlickrPOIProvider;
 import org.osmdroid.bonuspack.location.GeoNamesPOIProvider;
@@ -67,7 +30,6 @@ import org.osmdroid.util.BoundingBoxE6;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapController;
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.ItemizedIconOverlay;
 import org.osmdroid.views.overlay.ItemizedIconOverlay.OnItemGestureListener;
 import org.osmdroid.views.overlay.ItemizedOverlayWithFocus;
 import org.osmdroid.views.overlay.Overlay;
@@ -81,51 +43,34 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.SubMenu;
 
+import fr.univsavoie.ltp.client.map.Session;
 import fr.univsavoie.ltp.client.map.Friends;
 import fr.univsavoie.ltp.client.map.FriendsAdapter;
-import fr.univsavoie.ltp.client.map.MyItemizedOverlay;
 import fr.univsavoie.ltp.client.map.POIInfoWindow;
+import fr.univsavoie.ltp.client.map.Popup;
 import fr.univsavoie.ltp.client.map.ViaPointInfoWindow;
-import fr.univsavoie.ltp.client.tools.SimpleSSLSocketFactory;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Point;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.ContextMenu;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.MenuInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
-import android.view.animation.DecelerateInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -135,7 +80,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.PopupWindow;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -150,54 +94,46 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 	 * --------------------------------
 	 */
 	
-	/* Variables de OSMDroid */
-	private SimpleLocationOverlay mMyLocationOverlay;
+	/* Variables pour la bibliothèque OSMdroid */
+	private SimpleLocationOverlay locationOverlay;
 	private MapView map;
-	private MapController myMapController;
+	private MapController mapController;
 	private LocationManager locationManager;
 	private Location lastLocation;
 	private ArrayList<OverlayItem> overlayItemArray;
-	
 	protected GeoPoint startPoint, destinationPoint;
 	protected ArrayList<GeoPoint> viaPoints;
 	protected static int START_INDEX=-2, DEST_INDEX=-1;
-	protected ItemizedOverlayWithBubble<ExtendedOverlayItem> itineraryMarkers; 
-		//for departure, destination and viapoints
+	protected ItemizedOverlayWithBubble<ExtendedOverlayItem> itineraryMarkers;
 	protected ExtendedOverlayItem markerStart, markerDestination;
-	SimpleLocationOverlay myLocationOverlay;
-
+	private SimpleLocationOverlay myLocationOverlay;
 	protected Road mRoad;
 	protected PathOverlay roadOverlay;
 	protected ItemizedOverlayWithBubble<ExtendedOverlayItem> roadNodeMarkers;
 	protected static final int ROUTE_REQUEST = 3;
-	
-	ArrayList<POI> mPOIs;
-	ItemizedOverlayWithBubble<ExtendedOverlayItem> poiMarkers;
-	AutoCompleteTextView poiTagText;
+	private ArrayList<POI> mPOIs;
+	private ItemizedOverlayWithBubble<ExtendedOverlayItem> poiMarkers;
+	private AutoCompleteTextView poiTagText;
 	protected static final int POIS_REQUEST = 4;
+	private ArrayList<OverlayItem> anotherOverlayItemArray;
 	
-	/* Variables du service HTTP / Apache */
-	private DefaultHttpClient httpClient;
-	private HttpGet httpGet;
-	private ResponseHandler<String> responseHandler;
-	
-	/* Variables de gestion */
-	private boolean displayAuthBox, displayUserInfos;
+	/* Variables de traitements */
+	private boolean displayUserInfos;
 	private String login;
-	
 	private ListView lvListeFriends;
 	private List<Friends> listFriends = new ArrayList<Friends>();
-	
-	/* Variables constantes */
-	private ArrayList<OverlayItem> anotherOverlayItemArray;
 	private ScrollView viewMapFilters;
+	
+	/* Variables de classes */
+	private Popup popup;
+	private Session session;
+	
 	
     /* --------------------------------------------------------
      * Evenements de l'activity (onCreate, onResume, onStop...)
      * --------------------------------------------------------
      */
 	
-	/** Appelé quand l'activité est crée */
     @Override
     public void onCreate(Bundle savedInstanceState)  
     {
@@ -227,10 +163,10 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		map.setMultiTouchControls(true);
 		
 		// MapController settings
-		myMapController = map.getController();
+		mapController = map.getController();
 		
-		mMyLocationOverlay = new SimpleLocationOverlay(this);                          
-        map.getOverlays().add(mMyLocationOverlay);
+		locationOverlay = new SimpleLocationOverlay(this);                          
+        map.getOverlays().add(locationOverlay);
         
 		//To use MapEventsReceiver methods, we add a MapEventsOverlay:
 		MapEventsOverlay overlay = new MapEventsOverlay(this, this);
@@ -257,21 +193,24 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 			} 
 			else 
 			{
+				lastLocation = new Location("");
+				lastLocation.setLatitude(46.227638);
+				lastLocation.setLongitude(2.213749000000);
 				startPoint = new GeoPoint(46.227638, 2.213749000000);
 			}
 			
 			destinationPoint = null;
 			viaPoints = new ArrayList<GeoPoint>();
-			myMapController.setZoom(7);
-			myMapController.setCenter(startPoint);
+			mapController.setZoom(7);
+			mapController.setCenter(startPoint);
 		} 
 		else 
 		{
 			startPoint = savedInstanceState.getParcelable("start");
 			destinationPoint = savedInstanceState.getParcelable("destination");
 			viaPoints = savedInstanceState.getParcelableArrayList("viapoints");
-			myMapController.setZoom(savedInstanceState.getInt("zoom_level"));
-			myMapController.setCenter((GeoPoint)savedInstanceState.getParcelable("map_center"));
+			mapController.setZoom(savedInstanceState.getInt("zoom_level"));
+			mapController.setCenter((GeoPoint)savedInstanceState.getParcelable("map_center"));
 		}
 		
 		myLocationOverlay = new SimpleLocationOverlay(this, new DefaultResourceProxyImpl(this));
@@ -284,7 +223,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		//MyItemizedIconOverlay myItemizedIconOverlay = new MyItemizedIconOverlay(overlayItemArray, null, defaultResourceProxyImpl);
 		//map.getOverlays().add(myItemizedIconOverlay);
         
-		// Itinerary markers:
+		// Pointeurs d'itinérairea:
 		final ArrayList<ExtendedOverlayItem> waypointsItems = new ArrayList<ExtendedOverlayItem>();
 		itineraryMarkers = new ItemizedOverlayWithBubble<ExtendedOverlayItem>(this, waypointsItems, 
 				map, new ViaPointInfoWindow(R.layout.itinerary_bubble, map));
@@ -298,11 +237,10 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 			}
 		});
 		
-		registerForContextMenu(searchButton);
 		//context menu for clicking on the map is registered on this button. 
-		//(a little bit strange, but if we register it on mapView, it will catch map drag events)
+		registerForContextMenu(searchButton);
         
-		//Route and Directions
+		// Routes et Itinéraires
 		final ArrayList<ExtendedOverlayItem> roadItems = new ArrayList<ExtendedOverlayItem>();
     	roadNodeMarkers = new ItemizedOverlayWithBubble<ExtendedOverlayItem>(this, roadItems, map);
 		map.getOverlays().add(roadNodeMarkers);
@@ -321,8 +259,10 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 				android.R.layout.simple_dropdown_item_1line, poiTags);
         poiTagText.setAdapter(adapter);
         Button setPOITagButton = (Button) findViewById(R.id.buttonSetPOITag);
-        setPOITagButton.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
+        setPOITagButton.setOnClickListener(new View.OnClickListener()
+        {
+			public void onClick(View v)
+			{
 				//Hide the soft keyboard:
 				InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 				imm.hideSoftInputFromWindow(poiTagText.getWindowToken(), 0);
@@ -350,19 +290,6 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 			{
 				Friends item = (Friends) adapter.getItemAtPosition(position);
 				
-				/*AlertDialog.Builder adb = new AlertDialog.Builder(MainActivity.this);
-				adb.setTitle("ListView OnClick");
-				//adb.setMessage("Selected Item is = " + lvListeFriends.getItemAtPosition(position));
-				adb.setMessage("Selected Item is = " + item.getLatitude() + " " + item.getLongitude());
-				adb.setPositiveButton("Ok", null);
-				adb.show();*/
-				
-				
-				//startPoint = new GeoPoint(item.getLatitude(), item.getLongitude());
-				//markerStart = putMarkerItem(markerStart, startPoint, START_INDEX,
-				//R.string.departure, R.drawable.marker_departure, -1);
-				//getRoadAsync();
-				
 				destinationPoint = new GeoPoint(item.getLongitude(), item.getLatitude());
 				markerDestination = putMarkerItem(markerDestination, destinationPoint, DEST_INDEX,
 			    		R.string.destination, R.drawable.marker_destination, -1);
@@ -371,14 +298,16 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 			}
 		});
 		
-		
+		// Instancier les classes utiles
+		popup = new Popup(this);
+		session = new Session(this);
         
-        // Initialiser tout ce qui est données utilisateur propres a l'activité
+        // Initialiser tout ce qui est données utilisateur propres à l'activité
         init();
     }
     
-	@Override
-	protected void onSaveInstanceState (Bundle outState){
+	protected void onSaveInstanceState (Bundle outState)
+	{
 		outState.putParcelable("start", startPoint);
 		outState.putParcelable("destination", destinationPoint);
 		outState.putParcelableArrayList("viapoints", viaPoints);
@@ -390,7 +319,6 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 	}
     
 	// Création d'un menu contenant un bouton rafraichir et un menu déroulant
-	@Override
 	public boolean onCreateOptionsMenu(Menu menu) 
 	{
 		menu.add(0, 1, 0, R.string.back_to_my_pos).setIcon(R.drawable.ic_10_device_access_location_found)
@@ -428,13 +356,14 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		return true;
 	}
 
-	// Methode callback appelée lorqu'un item du menu est sélcetionné
-	@Override
+	// Méthode callback appelée lorqu'un item du menu est sélcetionné
 	public boolean onOptionsItemSelected(MenuItem item) 
 	{
-		// Le bouton "retour" a le même title que la page.
+		// Le bouton "retour" à le même titre que la page.
 		if (item.getTitle().toString().compareTo(getTitle().toString()) == 0)
+		{
 			finish();
+		}
 		
 		Log.d("Watch", "LOGIN: " + login);
 
@@ -444,7 +373,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		{
 		// Publier son status
 		case 0:
-			popupPublishStatus();
+			popup.popupPublishStatus();
 			break;
 			
 		// Quitter l'application
@@ -482,12 +411,12 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 			
 		// Afficher les dernieres infos de l'utilisateur connecté
 		case 11:
-			popupDisplayUserInfos();
+			popup.popupDisplayUserInfos();
 			break;
 			
 		// Déconnecter l'utilisateur actif
 		case 12:
-			userLogout();
+			session.logout();
 			break;
 
 		default:
@@ -496,7 +425,6 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		return true;
 	}
 	
-	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) 
 	{
 		super.onActivityResult(requestCode, resultCode, data);
@@ -510,9 +438,6 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 			{
 			case RESULT_OK:
 				Toast.makeText(this, R.string.auth_ok, Toast.LENGTH_LONG).show();
-				//setup();
-				//auth();
-				//parseFriends();
 				finish();
 				startActivity(getIntent());
 				return;
@@ -578,7 +503,6 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		}
 	}
 	
-	@Override
 	public void onConfigurationChanged(Configuration newConfig) 
 	{
 		super.onConfigurationChanged(newConfig);
@@ -586,22 +510,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 				"onConfigurationChanged(): " + newConfig.toString(),
 				Toast.LENGTH_SHORT).show();
 	}
-    
-	@Override
-	protected void onStop() 
-	{
-		super.onStop();
-	}
-    
-	@Override
-	protected void onDestroy() 
-	{
-		super.onDestroy();
-
-		finish();
-	}
 	
-    @Override
 	protected void onResume() 
     {
 		if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
@@ -615,36 +524,29 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		 
 		super.onResume();
 	}
-
-	@Override
+    
 	protected void onPause() 
 	{
 		super.onPause();
 	}
 	
-	
+	protected void onStop() 
+	{
+		super.onStop();
+	}
+    
+	protected void onDestroy() 
+	{
+		super.onDestroy();
+
+		finish();
+	}
 	
 	/* ----------------------------------------
 	 * Fonctions et procédures de l'application
 	 * ----------------------------------------
 	 */
 	
-    /**
-     * Test MyItemizedOverlay object
-     */
-    public void putMyItemizedOverlay(GeoPoint p)
-    {
-		ArrayList<OverlayItem> list = new ArrayList<OverlayItem>();
-		MyItemizedOverlay myOverlays = new MyItemizedOverlay(this, list);
-		OverlayItem overlayItem = new OverlayItem("Home Sweet Home", "This is the place I live", p);
-		overlayItem.setMarkerHotspot(OverlayItem.HotspotPlace.BOTTOM_CENTER);
-		Drawable marker = getResources().getDrawable(R.drawable.marker_departure);
-		overlayItem.setMarker(marker);
-		myOverlays.addItem(overlayItem);
-		map.getOverlays().add(myOverlays);    	
-		map.invalidate();
-    }
-    
     /** 
      * Reverse Geocoding
      */
@@ -652,27 +554,36 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
     {
 		GeocoderNominatim geocoder = new GeocoderNominatim(this);
 		String theAddress;
-		try {
+		try
+		{
 			double dLatitude = p.getLatitudeE6() * 1E-6;
 			double dLongitude = p.getLongitudeE6() * 1E-6;
 			List<Address> addresses = geocoder.getFromLocation(dLatitude, dLongitude, 1);
 			StringBuilder sb = new StringBuilder(); 
-			if (addresses.size() > 0) { 
+			if (addresses.size() > 0)
+			{ 
 				Address address = addresses.get(0); 
 				int n = address.getMaxAddressLineIndex();
-				for (int i=0; i<=n; i++) {
-					if (i!=0) 
+				for (int i=0; i<=n; i++)
+				{
+					if (i!=0)
+					{
 						sb.append(", ");
+					}
 					sb.append(address.getAddressLine(i));
 				}
 				theAddress = new String(sb.toString());
-			} else {
+			}
+			else
+			{
 				theAddress = null;
 			}
-		} catch (IOException e) {
+		} catch (IOException e)
+		{
 			theAddress = null;
 		}
-		if (theAddress != null) {
+		if (theAddress != null)
+		{
 			return theAddress;
 		} else {
 			return "";
@@ -712,21 +623,23 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 	private class GeocodingTask extends AsyncTask<Object, Void, String> 
 	{
 		ExtendedOverlayItem marker;
-		protected String doInBackground(Object... params) {
+		protected String doInBackground(Object... params)
+		{
 			marker = (ExtendedOverlayItem)params[0];
 			return getAddress(marker.getPoint());
 		}
-		protected void onPostExecute(String result) {
+		protected void onPostExecute(String result)
+		{
 			marker.setDescription(result);
 			//itineraryMarkers.showBubbleOnItem(???, map); //open bubble on the item
 		}
 	}
 	
 	/** add (or replace) an item in markerOverlays. p position. */
-    public ExtendedOverlayItem putMarkerItem(ExtendedOverlayItem item, GeoPoint p, int index,
-    		int titleResId, int markerResId, int iconResId) 
-    {
-		if (item != null){
+	public ExtendedOverlayItem putMarkerItem(ExtendedOverlayItem item, GeoPoint p, int index, int titleResId, int markerResId, int iconResId)
+	{
+		if (item != null)
+		{
 			itineraryMarkers.removeItem(item);
 		}
 		Drawable marker = getResources().getDrawable(markerResId);
@@ -735,7 +648,9 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		overlayItem.setMarkerHotspot(OverlayItem.HotspotPlace.BOTTOM_CENTER);
 		overlayItem.setMarker(marker);
 		if (iconResId != -1)
+		{
 			overlayItem.setImage(getResources().getDrawable(iconResId));
+		}
 		overlayItem.setRelatedObject(index);
 		itineraryMarkers.addItem(overlayItem);
 		map.invalidate();
@@ -743,7 +658,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		new GeocodingTask().execute(overlayItem);
 		return overlayItem;
 	}
-    
+	
 	public void addViaPoint(GeoPoint p)
 	{
 		viaPoints.add(p);
@@ -786,32 +701,32 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		}
 	}
 	
-    //------------ Route and Directions
+	//------------ Routes et Itinéraires
     
-    private void putRoadNodes(Road road)
-    {
+	private void putRoadNodes(Road road)
+	{
 		roadNodeMarkers.removeAllItems();
 		Drawable marker = getResources().getDrawable(R.drawable.marker_node);
 		int n = road.mNodes.size();
 		TypedArray iconIds = getResources().obtainTypedArray(R.array.direction_icons);
-    	for (int i=0; i<n; i++){
-    		RoadNode node = road.mNodes.get(i);
-    		String instructions = (node.mInstructions==null ? "" : node.mInstructions);
-    		ExtendedOverlayItem nodeMarker = new ExtendedOverlayItem(
-    				"Step " + (i+1), instructions, 
-    				node.mLocation, this);
-    		nodeMarker.setSubDescription(road.getLengthDurationText(node.mLength, node.mDuration));
-    		nodeMarker.setMarkerHotspot(OverlayItem.HotspotPlace.CENTER);
-    		nodeMarker.setMarker(marker);
-    		int iconId = iconIds.getResourceId(node.mManeuverType, R.drawable.ic_empty);
-    		if (iconId != R.drawable.ic_empty){
-	    		Drawable icon = getResources().getDrawable(iconId);
-	    		nodeMarker.setImage(icon);
-    		}
-    		roadNodeMarkers.addItem(nodeMarker);
-    	}
-    }
-    
+		for (int i = 0; i < n; i++)
+		{
+			RoadNode node = road.mNodes.get(i);
+			String instructions = (node.mInstructions == null ? "" : node.mInstructions);
+			ExtendedOverlayItem nodeMarker = new ExtendedOverlayItem("Step " + (i + 1), instructions, node.mLocation, this);
+			nodeMarker.setSubDescription(road.getLengthDurationText(node.mLength, node.mDuration));
+			nodeMarker.setMarkerHotspot(OverlayItem.HotspotPlace.CENTER);
+			nodeMarker.setMarker(marker);
+			int iconId = iconIds.getResourceId(node.mManeuverType, R.drawable.ic_empty);
+			if (iconId != R.drawable.ic_empty)
+			{
+				Drawable icon = getResources().getDrawable(iconId);
+				nodeMarker.setImage(icon);
+			}
+			roadNodeMarkers.addItem(nodeMarker);
+		}
+	}
+	
 	void updateUIWithRoad(Road road)
 	{
 		roadNodeMarkers.removeAllItems();
@@ -836,7 +751,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
     }
 	
 	/**
-	 * Async task to get the road in a separate thread. 
+	 * Tâche asynchrone afin d'obtenir trajet avec des processus séparés
 	 */
 	private class UpdateRoadTask extends AsyncTask<Object, Void, Road> 
 	{
@@ -853,7 +768,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 			*/
 			return roadManager.getRoad(waypoints);
 		}
-
+		
 		protected void onPostExecute(Road result) 
 		{
 			mRoad = result;
@@ -1005,119 +920,119 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 	
 	//------------ MapEventsReceiver implementation
 
-		GeoPoint tempClickedGeoPoint; //any other way to pass the position to the menu ???
+	GeoPoint tempClickedGeoPoint; //any other way to pass the position to the menu ???
+	
+	public boolean longPressHelper(IGeoPoint p) 
+	{
+		tempClickedGeoPoint = new GeoPoint((GeoPoint)p);
+		Button searchButton = (Button)findViewById(R.id.buttonSearch);
+		openContextMenu(searchButton); //menu is hooked on the "Search" button
+		return true;
+	}
 		
-		@Override 
-		public boolean longPressHelper(IGeoPoint p) 
-		{
-			tempClickedGeoPoint = new GeoPoint((GeoPoint)p);
-			Button searchButton = (Button)findViewById(R.id.buttonSearch);
-			openContextMenu(searchButton); //menu is hooked on the "Search" button
-			return true;
-		}
+	public boolean singleTapUpHelper(IGeoPoint p) 
+	{
+		viewMapFilters.setVisibility(View.GONE);
+		return false;
+	}
 
-		@Override 
-		public boolean singleTapUpHelper(IGeoPoint p) 
+	//----------- Menu contextuel lors d'un appuis prolongé sur la carte
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) 
+	{
+		super.onCreateContextMenu(menu, v, menuInfo);
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.map_menu, menu);
+	}
+		
+	public boolean onContextItemSelected(android.view.MenuItem item) 
+	{
+		switch (item.getItemId()) 
 		{
-			viewMapFilters.setVisibility(View.GONE);
+		case R.id.menu_departure:
+			startPoint = new GeoPoint((GeoPoint)tempClickedGeoPoint);
+			markerStart = putMarkerItem(markerStart, startPoint, START_INDEX,
+				R.string.departure, R.drawable.marker_departure, -1);
+			getRoadAsync();
+			return true;
+		case R.id.menu_destination:
+			destinationPoint = new GeoPoint((GeoPoint)tempClickedGeoPoint);
+			markerDestination = putMarkerItem(markerDestination, destinationPoint, DEST_INDEX,
+				R.string.destination, R.drawable.marker_destination, -1);
+			getRoadAsync();
+			return true;
+		case R.id.menu_viapoint:
+			GeoPoint viaPoint = new GeoPoint((GeoPoint)tempClickedGeoPoint);
+			addViaPoint(viaPoint);
+			getRoadAsync();
+			return true;
+		default:
 			return false;
 		}
-
-		//----------- Context Menu when clicking on the map
-		@Override 
-		public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) 
-		{
-			super.onCreateContextMenu(menu, v, menuInfo);
-			MenuInflater inflater = getMenuInflater();
-			inflater.inflate(R.menu.map_menu, menu);
-		}
+	}
 		
-		@Override
-		public boolean onContextItemSelected(android.view.MenuItem item) 
-		{
-			switch (item.getItemId()) 
-			{
-			case R.id.menu_departure:
-				startPoint = new GeoPoint((GeoPoint)tempClickedGeoPoint);
-				markerStart = putMarkerItem(markerStart, startPoint, START_INDEX,
-					R.string.departure, R.drawable.marker_departure, -1);
-				getRoadAsync();
-				return true;
-			case R.id.menu_destination:
-				destinationPoint = new GeoPoint((GeoPoint)tempClickedGeoPoint);
-				markerDestination = putMarkerItem(markerDestination, destinationPoint, DEST_INDEX,
-					R.string.destination, R.drawable.marker_destination, -1);
-				getRoadAsync();
-				return true;
-			case R.id.menu_viapoint:
-				GeoPoint viaPoint = new GeoPoint((GeoPoint)tempClickedGeoPoint);
-				addViaPoint(viaPoint);
-				getRoadAsync();
-				return true;
-			default:
-				return false;
-			}
-		}/*
-		
-		//------------ Option Menu implementation
-		
-		@Override 
-		public boolean onCreateOptionsMenu(Menu menu) {
-			MenuInflater inflater = getMenuInflater();
-			inflater.inflate(R.menu.option_menu, menu);
+	/*//------------ Option Menu implementation
+	
+	@Override 
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.option_menu, menu);
+		return true;
+	}
+	
+	@Override 
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		if (mRoad != null && mRoad.mNodes.size()>0)
+			menu.findItem(R.id.menu_itinerary).setEnabled(true);
+		else 
+			menu.findItem(R.id.menu_itinerary).setEnabled(false);
+		if (mPOIs != null && mPOIs.size()>0)
+			menu.findItem(R.id.menu_pois).setEnabled(true);
+		else 
+			menu.findItem(R.id.menu_pois).setEnabled(false);
+		return true;
+	}
+	
+	@Override 
+	public boolean onOptionsItemSelected(MenuItem item) {
+		Intent myIntent;
+		switch (item.getItemId()) {
+		case R.id.menu_itinerary:
+			myIntent = new Intent(this, RouteActivity.class);
+			myIntent.putExtra("ROAD", mRoad);
+			myIntent.putExtra("NODE_ID", roadNodeMarkers.getBubbledItemId());
+			startActivityForResult(myIntent, ROUTE_REQUEST);
 			return true;
-		}
-		
-		@Override 
-		public boolean onPrepareOptionsMenu(Menu menu) {
-			if (mRoad != null && mRoad.mNodes.size()>0)
-				menu.findItem(R.id.menu_itinerary).setEnabled(true);
-			else 
-				menu.findItem(R.id.menu_itinerary).setEnabled(false);
-			if (mPOIs != null && mPOIs.size()>0)
-				menu.findItem(R.id.menu_pois).setEnabled(true);
-			else 
-				menu.findItem(R.id.menu_pois).setEnabled(false);
+		case R.id.menu_pois:
+			myIntent = new Intent(this, POIActivity.class);
+			myIntent.putParcelableArrayListExtra("POI", mPOIs);
+			myIntent.putExtra("ID", poiMarkers.getBubbledItemId());
+			startActivityForResult(myIntent, POIS_REQUEST);
 			return true;
+		default:
+			return super.onOptionsItemSelected(item);
 		}
+	}*/
+	
+	//------------ LocationListener implementation
+	public void onLocationChanged(final Location location)
+	{
+		myLocationOverlay.setLocation(new GeoPoint(location));
+	}
+
+	public void onProviderDisabled(String provider) {
 		
-		@Override 
-		public boolean onOptionsItemSelected(MenuItem item) {
-			Intent myIntent;
-			switch (item.getItemId()) {
-			case R.id.menu_itinerary:
-				myIntent = new Intent(this, RouteActivity.class);
-				myIntent.putExtra("ROAD", mRoad);
-				myIntent.putExtra("NODE_ID", roadNodeMarkers.getBubbledItemId());
-				startActivityForResult(myIntent, ROUTE_REQUEST);
-				return true;
-			case R.id.menu_pois:
-				myIntent = new Intent(this, POIActivity.class);
-				myIntent.putParcelableArrayListExtra("POI", mPOIs);
-				myIntent.putExtra("ID", poiMarkers.getBubbledItemId());
-				startActivityForResult(myIntent, POIS_REQUEST);
-				return true;
-			default:
-				return super.onOptionsItemSelected(item);
-			}
-		}*/
+	}
+
+	public void onProviderEnabled(String provider) {
 		
-		//------------ LocationListener implementation
-		@Override public void onLocationChanged(final Location pLoc) {
-	            myLocationOverlay.setLocation(new GeoPoint(pLoc));
-	    }
+	}
 
-		@Override public void onProviderDisabled(String provider) {
-		}
-
-		@Override public void onProviderEnabled(String provider) {
-		}
-
-		@Override public void onStatusChanged(String provider, int status, Bundle extras) {
-		}
+	public void onStatusChanged(String provider, int status, Bundle extras){
+		
+	}
 	
 	/**
-	 * Procédure qui s'occupe de mettre a jours certains variables
+	 * Procédure qui s'occupe de mettre à jours certaines variables
 	 * locales à l'activité par rapport à la session utilisateur, affichage
 	 * ou pas de certains composants...
 	 */
@@ -1126,7 +1041,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		// On recupère les préférences utilisateurs paramètrer dans l'activité des Paramètres
 		SharedPreferences userPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		displayUserInfos = userPrefs.getBoolean("checkBoxDisplayUserInfos", false);
-        
+		
 		// Instance de SharedPreferences pour lire les données dans un fichier
 		SharedPreferences myPrefs = this.getSharedPreferences("UserPrefs", MODE_WORLD_READABLE); 
 		login = myPrefs.getString("Email", null);
@@ -1134,146 +1049,95 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		// Afficher la boite de dialogue au démarrage ?
 		// Si oui, celle anonyme ou utilisateur connecté ?
 		if (login == null)
-			popupGuest();
+		{
+			popup.popupGuest();
+		}
 		else
+		{
 			if (displayUserInfos)
-				popupDisplayUserInfos();
-    	
-    	// On met a jours la barre infos de l'utilisateur
+			{
+				popup.popupDisplayUserInfos();
+			}
+		}
+		
+		// On met a jours la barre infos de l'utilisateur
 		if (login == null)
 			infoBar("Salut, Etranger, connecte toi!", true);
 		else
 			infoBar("Salut, " + login + "! ", true);
 	}
 	
-    /**
-     * Initialiser les composants de l'application
-     */
-    private void init()
-    {
-    	setup();
-        
-        try 
-        {
+	/**
+	 * Initialiser les composants de l'application
+	 */
+	private void init()
+	{
+		setup();
+		
+		try
+		{
 			// Connecter l'utilisateur et parser ses amis
 			if (login != null)
 			{
 				// Appeler la fonction pour s'authentifier auprès du service LTP
-				auth();
+				session.auth();
 				
 				// Appeler la fonction pour parser les amis et les affichés sur la carte
-				parseFriends();
+				displayFriends();
 			}
 			
 			//Add Scale Bar
 			//ScaleBarOverlay myScaleBarOverlay = new ScaleBarOverlay(this);
 			//myOpenMapView.getOverlays().add(myScaleBarOverlay);
-			      
-			// Prepare array of users icons in map
-			/*ArrayList<OverlayItem> anotherOverlayItemArray;
-			anotherOverlayItemArray = new ArrayList<OverlayItem>();
-			anotherOverlayItemArray.add(new OverlayItem("0, 0", "0, 0", new GeoPoint(0, 0)));
-			anotherOverlayItemArray.add(new OverlayItem("Chuck Norris", "Alors, on va boire une bierre ?", new GeoPoint(38.883333, -77.016667)));*/
-        } 
-        catch (Exception e) 
-        {
-        	Log.e("Catch", "> onCreate() - Exception : " + e.getMessage());
+		} catch (Exception e)
+		{
+			Log.e("Catch", "> onCreate() - Exception : " + e.getMessage());
 		}
-    }
-    
-    /**
-     * La barre d'infos qui se situe après l'action bar
-     */
-    public void infoBar(String pMessage, boolean isVisible)
-    {
-    	// On définit le message a afficher
-    	TextView msg = (TextView)findViewById(R.id.textViewUserStatus);
-    	msg.setText(pMessage);
-    	
-    	// On charge le linearLayout ou on affiche la barre d'infos
+	}
+	
+	/**
+	 * La barre d'infos qui se situe après l'action bar
+	 */
+	public void infoBar(String pMessage, boolean isVisible)
+	{
+		// On définit le message a afficher
+		TextView msg = (TextView)findViewById(R.id.textViewUserStatus);
+		msg.setText(pMessage);
+
+		// On charge le linearLayout ou on affiche la barre d'infos
 		LinearLayout layoutInfos = (LinearLayout) findViewById(R.id.linearLayoutInfos);
-		
+
 		// On lance une nouvelle animation pour afficher et faire disparaitre la barre
 		Animation animationFadeInOut = AnimationUtils.loadAnimation(MainActivity.this, R.anim.fade_in_out);
 		layoutInfos.startAnimation(animationFadeInOut);
-    }
-    
-
-
-   
-    
+	}
+	
     /**
-     * Fonction pour parser sur la carte, les amis de l'utilisateur connecté
+     * Fonction pour afficher sur la carte les amis en forme
+     * de marqueurs avec a l'interieur son status, ...
      */
-	public void parseFriends()
+	public void displayFriends()
     {
-    	String response = null;
-    	
         anotherOverlayItemArray = new ArrayList<OverlayItem>();
         
         try 
         {
-        	// FIX POUR EVITER QUE L'APPLI PLANTE SUR DES VERSION ANDROID AU SDK > 8
-        	// Ce code remplace le StrictMode qui est pas dispo dans les versions d'android < 2.3...
-        	// mais c'est pas terrible, ca peux ne pas fonctionner d'une config a une autre !
-        	int SDK_INT = android.os.Build.VERSION.SDK_INT;
-			if (SDK_INT>8) 
-			{
-				try 
-				{
-			        Class<?> strictModeClass = Class.forName("android.os.StrictMode", true, Thread.currentThread()
-			                .getContextClassLoader());
-
-			        Class<?> threadPolicyClass = Class.forName("android.os.StrictMode$ThreadPolicy", true, Thread
-			                .currentThread().getContextClassLoader());
-
-			        Class<?> threadPolicyBuilderClass = Class.forName("android.os.StrictMode$ThreadPolicy$Builder", true,
-			                Thread.currentThread().getContextClassLoader());
-
-			        Method setThreadPolicyMethod = strictModeClass.getMethod("setThreadPolicy", threadPolicyClass);
-
-			        Method detectAllMethod = threadPolicyBuilderClass.getMethod("detectAll");
-			        Method penaltyMethod = threadPolicyBuilderClass.getMethod("penaltyLog");
-			        Method buildMethod = threadPolicyBuilderClass.getMethod("build");
-
-			        Constructor<?> threadPolicyBuilderConstructor = threadPolicyBuilderClass.getConstructor();
-			        Object threadPolicyBuilderObject = threadPolicyBuilderConstructor.newInstance();
-
-			        Object obj = detectAllMethod.invoke(threadPolicyBuilderObject);
-
-			        obj = penaltyMethod.invoke(obj);
-			        Object threadPolicyObject = buildMethod.invoke(obj);
-			        setThreadPolicyMethod.invoke(strictModeClass, threadPolicyObject);
-
-			    } 
-				catch (Exception ex) 
-				{
-			        
-			    }
-			}
-        	
-        	response = httpClient.execute(httpGet, responseHandler);
-
-			JSONObject potes = new JSONObject(response);			
-			JSONArray potesArray = potes.getJSONObject("gpx").getJSONArray("wpt");
+        	// Récupérer la liste des amis via appel serveur REST
+			JSONArray potesArray = session.parseFriends();
 			
-			Log.i("Watch", "Passage par: parseFriends()");
-			
-			if (potesArray.length() < 1)
-				return;
-			
+			// Vider la liste actuel
 			listFriends.clear();
 
-			// Parse user frinds list into OverlayItem arraylist
+			// Parser la liste des amis dans le OverlayItem ArrayList
 	        for (int i = 0 ; (i < potesArray.length()) ; i++ )
-	        {        	
-	        	// Get current friend
+	        {
+	        	// Obtenir l'amis
 	        	JSONObject pote = potesArray.getJSONObject(i);
 	        	
-		        // Prepare array of users icons in map
+		        // Préparé l'array des icônes amis sur la carte
 		        anotherOverlayItemArray.add(new OverlayItem(pote.getString("name"), pote.getString("desc"), new GeoPoint(pote.getDouble("@lat"), pote.getDouble("@lon"))));
 		        
-		        // Add friend info to friends ListView
+		        // Ajouter l'ami dans la friends ListView
 		        listFriends.add(new Friends(pote.getString("name"), pote.getString("desc"), pote.getDouble("@lat"), pote.getDouble("@lon")));
 	        }
 	        
@@ -1282,128 +1146,37 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 			lvListeFriends.setAdapter(adapter);
 	        adapter.notifyDataSetChanged();
 	        
-            // Create a new ItemizedOverlayWithFocus with our user item array
+            // Créer un nouveau ItemizedOverlayWithFocus avec notre array d'amis
+	        // Ensuite, on redessine la carte pour actualiser les marqueurs
             ItemizedOverlayWithFocus<OverlayItem> anotherItemizedIconOverlay = new ItemizedOverlayWithFocus<OverlayItem>(this, anotherOverlayItemArray, myOnItemGestureListener);
             map.getOverlays().add(anotherItemizedIconOverlay);
             map.refreshDrawableState();
             map.postInvalidate();
-            
-            // Setup icon overlay
-            anotherItemizedIconOverlay.setFocusItemsOnTap(true);
-            anotherItemizedIconOverlay.setFocusedItem(0);  
-            
-			runOnUiThread(new Runnable() {
-				@Override
+			/*runOnUiThread(new Runnable()
+			{
 				public void run() {
 					map.postInvalidate();
 				}
-			});
-		} catch (ClientProtocolException e) {
-			Log.e("Catch", "> parseFriends() - ClientProtocolException: " + e.getMessage());
-		} catch (IOException e) {
-			Log.e("Catch", "> parseFriends() - IOException: " + e.getMessage());
-		} catch (JSONException e) {
+			});*/
+			
+            // Paramètres pour l'overlay des icônes
+            anotherItemizedIconOverlay.setFocusItemsOnTap(true);
+            anotherItemizedIconOverlay.setFocusedItem(0);  
+		}
+        catch (JSONException e) 
+        {
 			Log.e("Catch", "> parseFriends() - JSONException: " + e.getMessage());
-		} catch (Exception e) {
+		} 
+        catch (Exception e) 
+        {
 			Log.e("Catch", "> parseFriends() - Exception: " + e.getMessage());
 		}
     }
     
-    /**
-     * S'authentifier auprès du service LocalizeTeaPot
-     */
-    public void auth() 
-	{
-		try
-		{
-			// Instance de SharedPreferences pour lire les données dans un fichier
-			SharedPreferences myPrefs = this.getSharedPreferences("UserPrefs", MODE_WORLD_READABLE); 
-			String login = myPrefs.getString("Email", null);
-			String password = myPrefs.getString("Password", null);
-			
-			Log.i("Watch", "login : " + login);
-			Log.i("Watch", "password : " + password);
-			
-			HttpRequestInterceptor preemptiveAuth = new HttpRequestInterceptor() 
-			{
-				@Override
-				public void process(final HttpRequest request,
-						final HttpContext context) throws HttpException, IOException {
-					AuthState authState = (AuthState) context.getAttribute(ClientContext.TARGET_AUTH_STATE);
-					CredentialsProvider credsProvider = (CredentialsProvider) context.getAttribute(ClientContext.CREDS_PROVIDER);
-					HttpHost targetHost = (HttpHost) context.getAttribute(ExecutionContext.HTTP_TARGET_HOST);
-
-					if (authState.getAuthScheme() == null) 
-					{
-						AuthScope authScope = new AuthScope(targetHost.getHostName(), targetHost.getPort());
-						Credentials creds = credsProvider.getCredentials(authScope);
-						if (creds != null) 
-						{
-							authState.setAuthScheme(new BasicScheme());
-							authState.setCredentials(creds);
-						}
-					}
-				}
-			};
-
-			// Setup a custom SSL Factory object which simply ignore the
-			// certificates
-			// validation and accept all type of self signed certificates
-			SSLSocketFactory sslFactory = new SimpleSSLSocketFactory(null);
-			sslFactory.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-
-			// Enable HTTP parameters
-			HttpParams params = new BasicHttpParams();
-			HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
-			HttpProtocolParams.setContentCharset(params, HTTP.UTF_8);
-
-			// Register the HTTP and HTTPS Protocols. For HTTPS, register our
-			// custom SSL Factory object.
-			SchemeRegistry registry = new SchemeRegistry();
-			//registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-			registry.register(new Scheme("https", sslFactory, 443));
-
-			// Create a new connection manager using the newly created registry
-			// and then create a new HTTP client using this connection manager
-			ClientConnectionManager ccm = new ThreadSafeClientConnManager( params, registry);
-
-			httpClient = new DefaultHttpClient(ccm, params);
-			//httpClient = new DefaultHttpClient();
-
-			CredentialsProvider authCred = new BasicCredentialsProvider();
-			Credentials creds = new UsernamePasswordCredentials(login, password);
-			authCred.setCredentials(AuthScope.ANY, creds);
-
-			httpClient.addRequestInterceptor(preemptiveAuth, 0);
-			httpClient.setCredentialsProvider(authCred);
-
-			//httpGet = new HttpGet("http://jibiki.univ-savoie.fr/teapot/api/localisations/carron/friendships?format=json");
-			httpGet = new HttpGet("https://jibiki.univ-savoie.fr/ltpdev/?p=rest&format=json&service=status&method=get");
-			//httpGet = new HttpGet("http://jibiki.univ-savoie.fr/ltp/api/localisations/"+login+"/friendships?format=json");
-			responseHandler = new BasicResponseHandler();
-		} 
-		catch (KeyManagementException e1) 
-		{
-			Log.e("Catch", "> auth() - KeyManagementException: " + e1.getMessage());
-		} 
-		catch (NoSuchAlgorithmException e1) 
-		{
-			Log.e("Catch", "> auth() - NoSuchAlgorithmException: " + e1.getMessage());
-		} 
-		catch (KeyStoreException e1) 
-		{
-			Log.e("Catch", "> auth() - KeyStoreException: " + e1.getMessage());
-		} 
-		catch (UnrecoverableKeyException e1) 
-		{
-			Log.e("Catch", "> auth() - UnrecoverableKeyException: " + e1.getMessage());
-		}
-	}
-    
     OnItemGestureListener<OverlayItem> myOnItemGestureListener = new OnItemGestureListener<OverlayItem>() 
 	{
-        @Override
-        public boolean onItemSingleTapUp(int index, OverlayItem item) {
+        public boolean onItemSingleTapUp(int index, OverlayItem item)
+        {
             Toast.makeText(
                 MainActivity.this,
                 item.mDescription + "\n" + item.mTitle + "\n"
@@ -1420,9 +1193,12 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		}
     };
     
+    /**
+     * Fonction qui relocalise l'utilisateur en centrant sur la carte
+     */
     private void relocateUser()
     {
-    	myMapController.setCenter(startPoint);   	
+    	mapController.setCenter(new GeoPoint(lastLocation.getLatitude(), lastLocation.getLongitude()));   	
     	map.invalidate();
     }
 	
@@ -1432,45 +1208,35 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 	 */
 	private void updateLoc(Location loc)
 	{
-        try 
+        try
         {
-			// Set new local GeoPoint for point to the map
-			GeoPoint locGeoPoint = new GeoPoint(loc.getLatitude(), loc.getLongitude());
-			myMapController.setCenter(locGeoPoint);
-			
+			// Met à jour notre localisation sur la carte
 			setOverlayLoc(loc);
-			
 			map.invalidate();
-			
 			updateUserGPSInfos(loc);
 		} 
-        catch (Exception e) 
+        catch (Exception e)
         {
 			Log.e("Catch", "> updateLoc() - Exception : "  + e.getMessage());
 		}
     }
 	
 	/**
-	 * On met a jours les infos utilisateurs de sa situation géographique dans
+	 * On met à jour les informations de l'utilisateur de sa situation géographique dans
 	 * les divers affichages de l'application.
-	 * @param loc Coordonnées GPS lat et long.
+	 * @param location Coordonnées GPS latitude et longitude.
 	 */
-	private void updateUserGPSInfos(Location loc)
+	private void updateUserGPSInfos(Location location)
 	{
     	try
     	{
 			// Update user localization coordinates
 			String latLongString = "";
-			if (loc != null) 
+			if (location != null) 
 			{
-			    double lat = loc.getLatitude();
-			    double lng = loc.getLongitude();
+			    double lat = location.getLatitude();
+			    double lng = location.getLongitude();
 			    latLongString = "Lat:" + lat + ", Long:" + lng;
-			    
-				//Geocoder gcd = new Geocoder(this, Locale.getDefault());
-				//List<Address> addresses = gcd.getFromLocation(lat, lng, 1);
-				//if (addresses.size() > 0) 
-				    //System.out.println(addresses.get(0).getLocality());
 			    
 			    infoBar("T'es localisé: " + getAddress(startPoint), true);
 			} 
@@ -1478,7 +1244,6 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 			{
 				infoBar("Ta position actuel n'a pas été trouvé !" + latLongString, true);
 			}
-			
 		} 
     	catch (Exception e) 
     	{
@@ -1486,322 +1251,35 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		}
 	}
 	
-	private void setOverlayLoc(Location overlayloc)
+	/**
+	 * Permet de changer les coordonnées de l'utilisateur
+	 * @param location la localisation à fixer
+	 */
+	private void setOverlayLoc(Location location)
 	{
-		GeoPoint overlocGeoPoint = new GeoPoint(overlayloc);
-    	overlayItemArray.clear();
-    	
+		overlayItemArray.clear();
+		GeoPoint overlocGeoPoint = new GeoPoint(location);
     	OverlayItem newMyLocationItem = new OverlayItem("My Location", "My Location", overlocGeoPoint);
     	overlayItemArray.add(newMyLocationItem);
 	}
     
     private LocationListener myLocationListener = new LocationListener()
     {
-		@Override
-		public void onLocationChanged(Location location) {
+		public void onLocationChanged(Location location)
+		{
 			updateLoc(location);
 		}
-
-		@Override
-		public void onProviderDisabled(String provider) {
+		
+		public void onProviderDisabled(String provider){
 			
 		}
-
-		@Override
-		public void onProviderEnabled(String provider) {
+		
+		public void onProviderEnabled(String provider){
 			
 		}
-
-		@Override
-		public void onStatusChanged(String provider, int status, Bundle extras) {
+		
+		public void onStatusChanged(String provider, int status, Bundle extras){
 			
 		}
     };
-    
-    /**
-     * Classe qui gère l'affichage de la localisation GPS sur la MapView
-     */
-    private class MyItemizedIconOverlay extends ItemizedIconOverlay<OverlayItem>
-    {
-		public MyItemizedIconOverlay
-		(
-				List<OverlayItem> pList,
-				org.osmdroid.views.overlay.ItemizedIconOverlay.OnItemGestureListener<OverlayItem> pOnItemGestureListener,
-				ResourceProxy pResourceProxy) 
-		{
-			super(pList, pOnItemGestureListener, pResourceProxy);
-		}
-
-		@Override
-		public void draw(Canvas canvas, MapView mapview, boolean arg2) 
-		{
-			super.draw(canvas, mapview, arg2);
-			
-			if(!overlayItemArray.isEmpty()){
-				
-				//overlayItemArray have only ONE element only, so I hard code to get(0)
-				GeoPoint in = overlayItemArray.get(0).getPoint();
-				
-				Point out = new Point();
-				mapview.getProjection().toPixels(in, out);
-				
-				Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.ic_menu_mylocation);
-				canvas.drawBitmap(bm, 
-						out.x - bm.getWidth()/2, 	//shift the bitmap center
-						out.y - bm.getHeight()/2, 	//shift the bitmap center
-						null);
-			}
-		}
-
-		@Override
-		public boolean onSingleTapUp(MotionEvent event, MapView mapView) 
-		{
-			//return super.onSingleTapUp(event, mapView);
-			return true;
-		}
-		
-		@Override
-		public boolean onLongPress(MotionEvent event, MapView mapView)
-		{
-			return false;
-			//return super.onLongPress(event, mapView);
-		}
-    }
-    
-    /**
-     * Procédure qui déconnecte l'utilisateur actif
-     */
-    private void userLogout()
-    {
-        // Instance de SharedPreferences pour enregistrer des données dans un fichier
-        SharedPreferences myPrefs = getSharedPreferences("UserPrefs", MODE_WORLD_READABLE); // Ici on permet donc la lecture de notre fichier de préférence à toutes les applications
-        SharedPreferences.Editor prefsEditor = myPrefs.edit(); // Instance de l'editeur permettant d'écrire dans le fichier
-        prefsEditor.putString("Email", null); // Données
-        prefsEditor.putString("Password", null); // Données
-        prefsEditor.commit(); // Valider les modifications
-        
-        // Redémarrer l'activité pour prendre en compte les modifications
-		Intent intent = getIntent();
-		finish();
-		startActivity(intent);
-    }
-    
-    /**
-     * Afficher sur la map un popup qui affiche les
-     * informations de l'utilisateur connecté.
-     */
-    private void popupDisplayUserInfos()
-    {
-		DisplayMetrics dm = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(dm);
-
-		//final int height = dm.heightPixels;
-		final int width = dm.widthPixels;
-		
-		int popupWidth = width / 2;
-		//int popupHeight = height / 2;
-		
-		// Inflate the popup_layout.xml
-		LinearLayout viewGroup = (LinearLayout) this.findViewById(R.id.popupAccount);
-		LayoutInflater layoutInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		
-		final View layout = layoutInflater.inflate(R.layout.popup_account,viewGroup);		
-		layout.setBackgroundResource(R.drawable.popup_gradient);
-
-		// Créer le PopupWindow
-		final PopupWindow popupUserInfos = new PopupWindow(layout, popupWidth, LayoutParams.WRAP_CONTENT, true);
-		popupUserInfos.setBackgroundDrawable(new BitmapDrawable());
-		popupUserInfos.setOutsideTouchable(true);
-
-		// Some offset to align the popup a bit to the right, and a bit down, relative to button's position.
-		final int OFFSET_X = 0;
-		final int OFFSET_Y = 0;
-
-		// Displaying the popup at the specified location, + offsets.
-		findViewById(R.id.layoutMain).post(new Runnable() 
-		{
-			@Override
-			public void run() 
-			{
-				popupUserInfos.showAtLocation(layout, Gravity.CENTER, OFFSET_X, OFFSET_Y);
-			}
-		});
-		
-		/*
-		 * Evenements composants du PopupWindow
-		 */
-		
-        // Ecouteur d'évènement sur le bouton pour se déconnecter
-		Button close = (Button) layout.findViewById(R.id.close);
-		close.setOnClickListener(new OnClickListener() 
-		{
-			@Override
-			public void onClick(View v) {
-				popupUserInfos.dismiss();
-			}
-		});
-    }
-    
-    /**
-     * Afficher sur la map un popup qui propose a l'utilisateur
-     * de mettre a jours son status
-     */
-    private void popupPublishStatus()
-    {
-		DisplayMetrics dm = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(dm);
-
-		//final int height = dm.heightPixels;
-		final int width = dm.widthPixels;
-		
-		int popupWidth = width / 2;
-		//int popupHeight = height / 2;
-		
-		// Inflate the popup_layout.xml
-		ScrollView viewGroup = (ScrollView) this.findViewById(R.id.popupStatus);
-		LayoutInflater layoutInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		
-		final View layout = layoutInflater.inflate(R.layout.popup_set_status,viewGroup);		
-		layout.setBackgroundResource(R.drawable.popup_gradient);
-
-		// Créer le PopupWindow
-		final PopupWindow popupPublishStatus = new PopupWindow(layout, popupWidth, LayoutParams.WRAP_CONTENT, true);
-		popupPublishStatus.setBackgroundDrawable(new BitmapDrawable());
-		popupPublishStatus.setOutsideTouchable(true);
-
-		// Some offset to align the popup a bit to the right, and a bit down, relative to button's position.
-		final int OFFSET_X = 0;
-		final int OFFSET_Y = 0;
-
-		// Displaying the popup at the specified location, + offsets.
-		findViewById(R.id.layoutMain).post(new Runnable() 
-		{
-			@Override
-			public void run() 
-			{
-				popupPublishStatus.showAtLocation(layout, Gravity.CENTER, OFFSET_X, OFFSET_Y);
-			}
-		});
-		
-		/*
-		 * Evenements composants du PopupWindow
-		 */
-
-        // Ecouteur d'évènement sur le bouton pour se déconnecter
-		Button publish = (Button) layout.findViewById(R.id.btStatusPublish);
-		publish.setOnClickListener(new OnClickListener() 
-		{
-			@Override
-			public void onClick(View v) 
-			{
-				EditText userStatus = (EditText) layout.findViewById(R.id.fieldUserStatus);				
-				if (userStatus.getText().toString().length() == 0 ) 
-				{
-					Toast.makeText(MainActivity.this, "Impossible de publié ton status !", Toast.LENGTH_LONG).show();
-					popupPublishStatus.dismiss();
-				} 
-				else if (userStatus.getText().toString().length() < 3 ) 
-				{
-					Toast.makeText(MainActivity.this, "Impossible de publié ton status !", Toast.LENGTH_LONG).show();
-					popupPublishStatus.dismiss();
-				}
-				else
-				{
-					Toast.makeText(MainActivity.this, "Status mise a jours !", Toast.LENGTH_LONG).show();
-					popupPublishStatus.dismiss();
-				}
-			}
-		});
-    }
-    
-    /**
-     * Afficher une boite au milieu de la carte si aucun utilisateur est connectés
-     * pour proposer a l'invité, de se connecter ou s'incrire aupres du service LTP.
-     */
-    private void popupGuest()
-    {
-		DisplayMetrics dm = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(dm);
-
-		//final int height = dm.heightPixels;
-		final int width = dm.widthPixels;
-		
-		int popupWidth = width / 2;
-		//int popupHeight = height / 2;
-		
-		// Inflate the popup_layout.xml
-		LinearLayout viewGroup = (LinearLayout) this.findViewById(R.id.popupGuest);
-		LayoutInflater layoutInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		
-		final View layout = layoutInflater.inflate(R.layout.popup_guest,viewGroup);		
-		layout.setBackgroundResource(R.drawable.popup_gradient);
-
-		// Créer le PopupWindow
-		final PopupWindow popupGuest = new PopupWindow(layout, popupWidth, LayoutParams.WRAP_CONTENT, true);
-		popupGuest.setBackgroundDrawable(new BitmapDrawable());
-		popupGuest.setOutsideTouchable(true);
-
-		// Some offset to align the popup a bit to the right, and a bit down, relative to button's position.
-		final int OFFSET_X = 0;
-		final int OFFSET_Y = 0;
-
-		// Displaying the popup at the specified location, + offsets.
-		findViewById(R.id.layoutMain).post(new Runnable() 
-		{
-			@Override
-			public void run() 
-			{
-				popupGuest.showAtLocation(layout, Gravity.CENTER, OFFSET_X, OFFSET_Y);
-			}
-		});
-		
-		/*
-		 * Evenements composants du PopupWindow
-		 */
-		
-        // Ecouteur d'évènement sur le bouton des paramètres
-        Button btLogin = (Button) layout.findViewById(R.id.btnPopupLogin);
-        btLogin.setOnClickListener(new OnClickListener() 
-        {
-        	@Override
-            public void onClick(View view) 
-            {
-        		// La constante CODE_MON_ACTIVITE représente l’identifiant de la requête
-        		// (requestCode) qui sera utilisé plus tard pour identifier l’activité
-        		// renvoyant la valeur de retour.
-        		Intent i = new Intent(MainActivity.this, LoginActivity.class);    
-        		startActivityForResult(i, 1);
-        		
-        		popupGuest.dismiss();
-            }
-        });
-        
-        // Ecouteur d'évènement sur le bouton des paramètres
-        Button btSignup = (Button) layout.findViewById(R.id.btnPopupSignup);
-        btSignup.setOnClickListener(new OnClickListener() 
-        {
-        	@Override
-            public void onClick(View view) 
-            {        		
-        		// La constante CODE_MON_ACTIVITE représente l’identifiant de la requête
-        		// (requestCode) qui sera utilisé plus tard pour identifier l’activité
-        		// renvoyant la valeur de retour.
-        		Intent i = new Intent(MainActivity.this, SignupActivity.class);    
-        		startActivityForResult(i, 3);
-        		
-        		popupGuest.dismiss();
-            }
-        });        
-
-        // Ecouteur d'évènement sur le bouton pour fermer l'application
-		Button close = (Button) layout.findViewById(R.id.btnPopupClose);
-		close.setOnClickListener(new OnClickListener() 
-		{
-			@Override
-			public void onClick(View v) 
-			{
-				popupGuest.dismiss();
-			}
-		});
-    }
 }
