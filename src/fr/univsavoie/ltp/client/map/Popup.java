@@ -40,7 +40,7 @@ public class Popup
 	
 	public Popup(MainActivity pActivity)
 	{
-		this.activity = pActivity;
+		activity = pActivity;
 	}
 	
 	

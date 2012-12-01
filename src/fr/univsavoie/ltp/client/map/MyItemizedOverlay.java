@@ -16,27 +16,30 @@ import android.content.Context;
  * TappableItemizedOverlay<OverlayItem> overlay = new TappableItemizedOverlay(this, list);
  * mapView.getOverlays.add(overlay);
  * </code>
- * 
- * @author M.Kergall
  */
 
-public class MyItemizedOverlay extends ItemizedIconOverlay<OverlayItem> {
+public class MyItemizedOverlay extends ItemizedIconOverlay<OverlayItem>
+{
 	protected Context mContext;
 	
-	public MyItemizedOverlay(final Context context, final List<OverlayItem> aList) {
-		 super(context, aList, new OnItemGestureListener<OverlayItem>() {
-            @Override public boolean onItemSingleTapUp(final int index, final OverlayItem item) {
-                    return false;
-            }
-            @Override public boolean onItemLongPress(final int index, final OverlayItem item) {
-                    return false;
-            }
-    	} );
+	public MyItemizedOverlay(final Context context, final List<OverlayItem> aList)
+	{
+		super(context, aList, new OnItemGestureListener<OverlayItem>()
+		{
+			public boolean onItemSingleTapUp(final int index, final OverlayItem item)
+			{
+				return false;
+			}
+			public boolean onItemLongPress(final int index, final OverlayItem item)
+			{
+				return false;
+			}
+		});
 		mContext = context;
 	}
 	
-	@Override protected boolean onSingleTapUpHelper(final int index, final OverlayItem item, final MapView mapView) {
-		//Toast.makeText(mContext, "Item " + index + " has been tapped!", Toast.LENGTH_SHORT).show();
+	protected boolean onSingleTapUpHelper(final int index, final OverlayItem item, final MapView mapView)
+	{
 		AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
 		dialog.setTitle(item.getTitle());
 		dialog.setMessage(item.getSnippet());

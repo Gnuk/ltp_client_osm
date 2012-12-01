@@ -68,7 +68,6 @@ public class Session
 	/*
 	 * Constructeur
 	 */
-	
 	public Session(MainActivity activite)
 	{
 		this.activity = activite;

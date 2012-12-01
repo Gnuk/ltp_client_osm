@@ -1,6 +1,5 @@
 package fr.univsavoie.ltp.client;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -43,6 +42,8 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.SubMenu;
 
+import fr.univsavoie.ltp.client.map.Adresse;
+import fr.univsavoie.ltp.client.map.Localisation;
 import fr.univsavoie.ltp.client.map.Session;
 import fr.univsavoie.ltp.client.map.Friends;
 import fr.univsavoie.ltp.client.map.FriendsAdapter;
@@ -100,7 +101,6 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 	private MapController mapController;
 	private LocationManager locationManager;
 	private Location lastLocation;
-	private ArrayList<OverlayItem> overlayItemArray;
 	protected GeoPoint startPoint, destinationPoint;
 	protected ArrayList<GeoPoint> viaPoints;
 	protected static int START_INDEX=-2, DEST_INDEX=-1;
@@ -116,6 +116,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 	private AutoCompleteTextView poiTagText;
 	protected static final int POIS_REQUEST = 4;
 	private ArrayList<OverlayItem> anotherOverlayItemArray;
+	private Localisation myLocationListener = new Localisation(this, map, startPoint);
 	
 	/* Variables de traitements */
 	private boolean displayUserInfos;
@@ -127,6 +128,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 	/* Variables de classes */
 	private Popup popup;
 	private Session session;
+	private MainActivity activity = this;
 	
 	
 	/*
@@ -134,8 +136,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 	 * Evenements de l'activity (onCreate, onResume, onStop...)
 	 * --------------------------------------------------------
 	 */
-
-	@Override
+	
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
@@ -358,7 +359,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		return true;
 	}
 
-	// Méthode callback appelée lorqu'un item du menu est sélcetionné
+	// Méthode callback appelée lorqu'un item du menu est sélectionné
 	public boolean onOptionsItemSelected(MenuItem item) 
 	{
 		// Le bouton "retour" à le même titre que la page.
@@ -548,49 +549,6 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 	 * Fonctions et procédures de l'application
 	 * ----------------------------------------
 	 */
-	
-    /** 
-     * Reverse Geocoding
-     */
-    public String getAddress(GeoPoint p)
-    {
-		GeocoderNominatim geocoder = new GeocoderNominatim(this);
-		String theAddress;
-		try
-		{
-			double dLatitude = p.getLatitudeE6() * 1E-6;
-			double dLongitude = p.getLongitudeE6() * 1E-6;
-			List<Address> addresses = geocoder.getFromLocation(dLatitude, dLongitude, 1);
-			StringBuilder sb = new StringBuilder(); 
-			if (addresses.size() > 0)
-			{ 
-				Address address = addresses.get(0); 
-				int n = address.getMaxAddressLineIndex();
-				for (int i=0; i<=n; i++)
-				{
-					if (i!=0)
-					{
-						sb.append(", ");
-					}
-					sb.append(address.getAddressLine(i));
-				}
-				theAddress = new String(sb.toString());
-			}
-			else
-			{
-				theAddress = null;
-			}
-		} catch (IOException e)
-		{
-			theAddress = null;
-		}
-		if (theAddress != null)
-		{
-			return theAddress;
-		} else {
-			return "";
-		}
-    }
     
     /**
      * Geocoding of the destination address
@@ -628,7 +586,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		protected String doInBackground(Object... params)
 		{
 			marker = (ExtendedOverlayItem)params[0];
-			return getAddress(marker.getPoint());
+			return Adresse.getAddress(marker.getPoint(), activity);
 		}
 		protected void onPostExecute(String result)
 		{
@@ -753,7 +711,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
     }
 	
 	/**
-	 * Tâche asynchrone afin d'obtenir trajet avec des processus séparés
+	 * Tâche asynchrone afin d'obtenir le trajet avec des processus séparés
 	 */
 	private class UpdateRoadTask extends AsyncTask<Object, Void, Road> 
 	{
@@ -1026,17 +984,11 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		myLocationOverlay.setLocation(new GeoPoint(location));
 	}
 
-	public void onProviderDisabled(String provider) {
-		
-	}
+	public void onProviderDisabled(String provider) {}
 
-	public void onProviderEnabled(String provider) {
-		
-	}
+	public void onProviderEnabled(String provider) {}
 
-	public void onStatusChanged(String provider, int status, Bundle extras){
-		
-	}
+	public void onStatusChanged(String provider, int status, Bundle extras) {}
 	
 	/**
 	 * Procédure qui s'occupe de mettre à jours certaines variables
@@ -1193,9 +1145,9 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
                  
             return true;
         }
-
-		@Override
-		public boolean onItemLongPress(int arg0, OverlayItem arg1) {
+        
+		public boolean onItemLongPress(int arg0, OverlayItem arg1)
+		{
 			return false;
 		}
     };
@@ -1208,85 +1160,4 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
     	mapController.setCenter(new GeoPoint(lastLocation.getLatitude(), lastLocation.getLongitude()));   	
     	map.invalidate();
     }
-	
-	/**
-	 * Mise a jours des coordonnées géographique de l'utilisateur
-	 * @param loc
-	 */
-	private void updateLoc(Location loc)
-	{
-        try
-        {
-			// Met à jour notre localisation sur la carte
-			setOverlayLoc(loc);
-			map.invalidate();
-			updateUserGPSInfos(loc);
-		} 
-        catch (Exception e)
-        {
-			Log.e("Catch", "> updateLoc() - Exception : "  + e.getMessage());
-		}
-    }
-	
-	/**
-	 * On met à jour les informations de l'utilisateur de sa situation géographique dans
-	 * les divers affichages de l'application.
-	 * @param location Coordonnées GPS latitude et longitude.
-	 */
-	private void updateUserGPSInfos(Location location)
-	{
-    	try
-    	{
-			// Update user localization coordinates
-			String latLongString = "";
-			if (location != null) 
-			{
-			    double lat = location.getLatitude();
-			    double lng = location.getLongitude();
-			    latLongString = "Lat:" + lat + ", Long:" + lng;
-			    
-			    infoBar("T'es localisé: " + getAddress(startPoint), true);
-			} 
-			else 
-			{
-				infoBar("Ta position actuel n'a pas été trouvé !" + latLongString, true);
-			}
-		} 
-    	catch (Exception e) 
-    	{
-			Log.e("Catch", "> updateUserInterface() - Exception : "  + e.getMessage());
-		}
-	}
-	
-	/**
-	 * Permet de changer les coordonnées de l'utilisateur
-	 * @param location la localisation à fixer
-	 */
-	private void setOverlayLoc(Location location)
-	{
-		overlayItemArray.clear();
-		GeoPoint overlocGeoPoint = new GeoPoint(location);
-    	OverlayItem newMyLocationItem = new OverlayItem("My Location", "My Location", overlocGeoPoint);
-    	overlayItemArray.add(newMyLocationItem);
-	}
-    
-    private LocationListener myLocationListener = new LocationListener()
-    {
-		public void onLocationChanged(Location location)
-		{
-			updateLoc(location);
-		}
-		
-		public void onProviderDisabled(String provider){
-			
-		}
-		
-		public void onProviderEnabled(String provider){
-			
-		}
-		
-		public void onStatusChanged(String provider, int status, Bundle extras){
-			
-		}
-    };
 }
