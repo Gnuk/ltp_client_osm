@@ -129,44 +129,46 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 	private Session session;
 	
 	
-    /* --------------------------------------------------------
-     * Evenements de l'activity (onCreate, onResume, onStop...)
-     * --------------------------------------------------------
-     */
-	
-    @Override
-    public void onCreate(Bundle savedInstanceState)  
-    {
-    	super.onCreate(savedInstanceState);
-    	
-    	// Appliquer le thème LTP a l'ActionBar
-    	//setTheme(R.style.Theme_ltp);
-    	
-    	// Création de l'activité principale
-        setContentView(R.layout.activity_main);
-        
-        Log.e("Watch", "Activity Start");
-        
-        // Afficher la ActionBar
-        ActionBar mActionBar = getSupportActionBar();
-        mActionBar.setHomeButtonEnabled(true);
-        mActionBar.setDisplayShowHomeEnabled(true);
-        
-        viewMapFilters = (ScrollView) this.findViewById(R.id.scrollViewMapFilters);
-        viewMapFilters.setVisibility(View.GONE);
-               
+	/*
+	 * --------------------------------------------------------
+	 * Evenements de l'activity (onCreate, onResume, onStop...)
+	 * --------------------------------------------------------
+	 */
+
+	@Override
+	public void onCreate(Bundle savedInstanceState)
+	{
+		super.onCreate(savedInstanceState);
+
+		// Appliquer le thème LTP a l'ActionBar
+		// setTheme(R.style.Theme_ltp);
+
+		// Création de l'activité principale
+		setContentView(R.layout.activity_main);
+
+		Log.e("Watch", "Activity Start");
+
+		// Afficher la ActionBar
+		ActionBar mActionBar = getSupportActionBar();
+		mActionBar.setHomeButtonEnabled(true);
+		mActionBar.setDisplayShowHomeEnabled(true);
+
+		viewMapFilters = (ScrollView) this
+				.findViewById(R.id.scrollViewMapFilters);
+		viewMapFilters.setVisibility(View.GONE);
+
 		// MapView settings
-		map = (MapView)findViewById(R.id.openmapview);
+		map = (MapView) findViewById(R.id.openmapview);
 		map.setTileSource(TileSourceFactory.MAPNIK);
-		
+
 		map.setBuiltInZoomControls(true);
 		map.setMultiTouchControls(true);
 		
 		// MapController settings
 		mapController = map.getController();
 		
-		locationOverlay = new SimpleLocationOverlay(this);                          
-        map.getOverlays().add(locationOverlay);
+		locationOverlay = new SimpleLocationOverlay(this);
+		map.getOverlays().add(locationOverlay);
         
 		//To use MapEventsReceiver methods, we add a MapEventsOverlay:
 		MapEventsOverlay overlay = new MapEventsOverlay(this, this);
@@ -946,26 +948,31 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		
 	public boolean onContextItemSelected(android.view.MenuItem item) 
 	{
-		switch (item.getItemId()) 
+		if(item.getItemId() == R.id.menu_departure)
 		{
-		case R.id.menu_departure:
 			startPoint = new GeoPoint((GeoPoint)tempClickedGeoPoint);
 			markerStart = putMarkerItem(markerStart, startPoint, START_INDEX,
 				R.string.departure, R.drawable.marker_departure, -1);
 			getRoadAsync();
 			return true;
-		case R.id.menu_destination:
+		}
+		else if (item.getItemId() == R.id.menu_destination)
+		{
 			destinationPoint = new GeoPoint((GeoPoint)tempClickedGeoPoint);
 			markerDestination = putMarkerItem(markerDestination, destinationPoint, DEST_INDEX,
 				R.string.destination, R.drawable.marker_destination, -1);
 			getRoadAsync();
 			return true;
-		case R.id.menu_viapoint:
+		}
+		else if (item.getItemId() == R.id.menu_viapoint)
+		{
 			GeoPoint viaPoint = new GeoPoint((GeoPoint)tempClickedGeoPoint);
 			addViaPoint(viaPoint);
 			getRoadAsync();
 			return true;
-		default:
+		}
+		else
+		{
 			return false;
 		}
 	}
