@@ -16,12 +16,12 @@ import android.widget.Button;
  * 
  * @author M.Kergall
  */
-public class ViaPointInfoWindow extends DefaultInfoWindow
+public class ViaPoint extends DefaultInfoWindow
 {
 
 	int mSelectedPoint;
 	
-	public ViaPointInfoWindow(int layoutResId, MapView mapView)
+	public ViaPoint(int layoutResId, MapView mapView)
 	{
 		super(layoutResId, mapView);
 		Button boutonSupprimer = (Button)(mView.findViewById(R.id.bubble_delete));
@@ -41,5 +41,4 @@ public class ViaPointInfoWindow extends DefaultInfoWindow
 		mSelectedPoint = (Integer)item.getRelatedObject();
 		super.onOpen(item);
 	}
-
 }

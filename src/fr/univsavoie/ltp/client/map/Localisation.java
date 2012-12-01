@@ -87,10 +87,10 @@ public class Localisation implements LocationListener
 				double lng = location.getLongitude();
 				latLongString = "Lat:" + lat + ", Long:" + lng;
 
-				activity.infoBar("T'es localisé: " + Adresse.getAddress(startPoint, activity), true);
+				InfoBar.setText(activity, "T'es localisé: " + Adresse.getAddress(startPoint, activity), true);
 			} else
 			{
-				activity.infoBar("Ta position actuel n'a pas été trouvé !" + latLongString, true);
+				InfoBar.setText(activity, "Ta position actuel n'a pas été trouvé !" + latLongString, true);
 			}
 		} catch (Exception e)
 		{
