@@ -142,7 +142,7 @@ public class Session
 			getHttpClient().addRequestInterceptor(preemptiveAuth, 0);
 			getHttpClient().setCredentialsProvider(authCred);
 			
-			setHttpGet(new HttpGet("https://jibiki.univ-savoie.fr/ltpdev/?p=rest&format=json&service=status&method=get"));
+			setHttpGet(new HttpGet("https://jibiki.univ-savoie.fr/ltpdev/rest.php/api/1/statuses"));
 			setResponseHandler(new BasicResponseHandler());
 		} 
 		catch (KeyManagementException e1) 
@@ -215,7 +215,7 @@ public class Session
 
         	// Créer des objets JSON pour récupérer les informations récupéré sur le serveur REST
 			JSONObject potes = new JSONObject(response);		
-			JSONArray potesArray = potes.getJSONObject("gpx").getJSONArray("wpt");
+			JSONArray potesArray = potes.getJSONObject("ltp").getJSONArray("statuses");
 	
 			// On retourne la liste des amis
 			return potesArray;
