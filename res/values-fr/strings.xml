@@ -3,9 +3,6 @@
     <string name="app_name">LocalizeTeaPot</string>
     <string name="title_activity_main">LocalizeTeaPot</string>
     
-    <string name="provider_enabled">L\'accès %s est maintenant actif</string>
-    <string name="provider_disabled">L\'accès %s est maintenant inactif</string>
-    
     <string name="quit">Quitter</string>
     <string name="settings">Préférences</string>
     <string name="cancel">Annuler</string>
