@@ -468,10 +468,10 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		}
 	}
 	
+	@Override
 	public void onConfigurationChanged(Configuration newConfig) 
 	{
 		super.onConfigurationChanged(newConfig);
-		Toast.makeText(MainActivity.this, "onConfigurationChanged(): " + newConfig.toString(), Toast.LENGTH_SHORT).show();
 	}
 	
 	protected void onResume() 
@@ -656,7 +656,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 	{
 		mRoad = null;
 		if (startPoint == null || destinationPoint == null){
-			Itineraire.updateUIWithRoad(this, mRoad, itineraryMarkers, roadOverlay, map);
+			Itineraire.updateUIWithRoad(MainActivity.this, mRoad, itineraryMarkers, roadOverlay, map);
 			return;
 		}
 		ArrayList<GeoPoint> waypoints = new ArrayList<GeoPoint>(2);

@@ -20,7 +20,7 @@ import fr.univsavoie.ltp.client.R;
 
 public class Itineraire
 {
-	public static Road updateUIWithRoad(MainActivity activity, Road road, ItemizedOverlayWithBubble<ExtendedOverlayItem> roadNodeMarkers, PathOverlay roadOverlay, MapView map)
+	public static void updateUIWithRoad(MainActivity activity, Road road, ItemizedOverlayWithBubble<ExtendedOverlayItem> roadNodeMarkers, PathOverlay roadOverlay, MapView map)
 	{
 		roadNodeMarkers.removeAllItems();
 		List<Overlay> mapOverlays = map.getOverlays();
@@ -30,7 +30,7 @@ public class Itineraire
 		}
 		if (road == null)
 		{
-			return null;
+			return;
 		}
 		if (road.mStatus == Road.STATUS_DEFAULT)
 		{
@@ -40,15 +40,13 @@ public class Itineraire
 		Overlay removedOverlay = mapOverlays.set(1, roadOverlay);
 		
 		mapOverlays.add(removedOverlay);
-		Road r = putRoadNodes(activity, road, roadNodeMarkers, roadOverlay, map);
+		putRoadNodes(activity, road, roadNodeMarkers, roadOverlay, map);
 		map.invalidate();
 		
 		InfoBar.setText(activity, road.getLengthDurationText(-1), true);
-		
-		return r;
 	}
 	
-	private static Road putRoadNodes(MainActivity activity, Road road, ItemizedOverlayWithBubble<ExtendedOverlayItem> roadNodeMarkers, PathOverlay roadOverlay, MapView map)
+	private static void putRoadNodes(MainActivity activity, Road road, ItemizedOverlayWithBubble<ExtendedOverlayItem> roadNodeMarkers, PathOverlay roadOverlay, MapView map)
 	{
 		roadNodeMarkers.removeAllItems();
 		Drawable marker = activity.getResources().getDrawable(R.drawable.marker_node);
@@ -70,7 +68,5 @@ public class Itineraire
 			}
 			roadNodeMarkers.addItem(nodeMarker);
 		}
-		
-		return road;
 	}
 }
