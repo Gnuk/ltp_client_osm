@@ -16,14 +16,12 @@ import org.osmdroid.bonuspack.overlays.MapEventsReceiver;
 import org.osmdroid.bonuspack.routing.OSRMRoadManager;
 import org.osmdroid.bonuspack.routing.Road;
 import org.osmdroid.bonuspack.routing.RoadManager;
-import org.osmdroid.bonuspack.routing.RoadNode;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.BoundingBoxE6;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.*;
 import org.osmdroid.views.overlay.ItemizedIconOverlay.OnItemGestureListener;
 import org.osmdroid.views.overlay.ItemizedOverlayWithFocus;
-import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.PathOverlay;
 import org.osmdroid.views.overlay.SimpleLocationOverlay;
@@ -40,13 +38,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -78,7 +74,6 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 	
 	/* Variables pour la bibliothèque OSMdroid */
 	private SimpleLocationOverlay locationOverlay;
-	private ArrayList<OverlayItem> overlayItemArray;
 	private MapView map;
 	private MapController mapController;
 	private LocationManager locationManager;
@@ -98,6 +93,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 	private AutoCompleteTextView poiTagText;
 	protected static final int POIS_REQUEST = 4;
 	private ArrayList<OverlayItem> anotherOverlayItemArray;
+	private Localisation myLocationListener = new Localisation(this, map, startPoint);
 	
 	/* Variables de traitements */
 	private boolean displayUserInfos;
@@ -156,7 +152,6 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		
 		// Geolocalisation de l'utilisateur
 		locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-
 		if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
 		{
 			lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
@@ -225,7 +220,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		if (savedInstanceState != null)
 		{
 			mRoad = savedInstanceState.getParcelable("road");
-			updateUIWithRoad(mRoad);
+			Itineraire.updateUIWithRoad(this, mRoad, itineraryMarkers, roadOverlay, map);
 		}
 		
         //POI interface pour la recherche
@@ -481,10 +476,14 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 	
 	protected void onResume() 
     {
-		locationManager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
 		if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
-			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, myLocationListener);
-		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 0, myLocationListener);
+		{
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 1, myLocationListener);
+		} 
+		else if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
+		{
+			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 1, myLocationListener);
+		}
 		 
 		super.onResume();
 	}
@@ -648,7 +647,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		protected void onPostExecute(Road result) 
 		{
 			mRoad = result;
-			updateUIWithRoad(result);
+			Itineraire.updateUIWithRoad(MainActivity.this, result, itineraryMarkers, roadOverlay, map);
 			getPOIAsync(poiTagText.getText().toString());
 		}
 	}
@@ -657,7 +656,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 	{
 		mRoad = null;
 		if (startPoint == null || destinationPoint == null){
-			updateUIWithRoad(mRoad);
+			Itineraire.updateUIWithRoad(MainActivity.this, mRoad, itineraryMarkers, roadOverlay, map);
 			return;
 		}
 		ArrayList<GeoPoint> waypoints = new ArrayList<GeoPoint>(2);
@@ -844,115 +843,14 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 	//------------ LocationListener implementation
 	public void onLocationChanged(final Location location)
 	{
-		//myLocationOverlay.setLocation(new GeoPoint(location));
-		
-		GeoPoint p = new GeoPoint((int) (location.getLatitude() * 1E6), (int) (location.getLongitude() * 1E6));
-		myLocationOverlay.setLocation(p);
+		myLocationOverlay.setLocation(new GeoPoint(location));
 	}
-	
-	/**
-	 * Permet de changer les coordonnées de l'utilisateur
-	 * @param location la nouvelle localisation
-	 */
-	private void setOverlayLoc(Location location)
-	{
-		overlayItemArray.clear();
-		GeoPoint overlocGeoPoint = new GeoPoint(location);
-		OverlayItem newMyLocationItem = new OverlayItem("My Location", "My Location", overlocGeoPoint);
-		overlayItemArray.add(newMyLocationItem);
-	}
-	
-	/**
-	 * Mise a jours des coordonnées géographique de l'utilisateur
-	 * @param location la nouvelle localisation
-	 */
-	private void updateLoc(Location location)
-	{
-		try
-		{
-			// Met à jour notre localisation sur la carte
-			setOverlayLoc(location);
-			map.invalidate();
-			updateUserGPSInfos(location);
-		} catch (Exception e)
-		{
-			Log.e("Catch", "> updateLoc() - Exception : " + e.getMessage());
-		}
-	}
-	
-	/**
-	 * On met à jour les informations de l'utilisateur sur sa situation géographique dans
-	 * les divers affichages de l'application.
-	 * @param location Coordonnées GPS latitude et longitude.
-	 */
-	private void updateUserGPSInfos(Location location)
-	{
-		try
-		{
-			// Update user localization coordinates
-			String latLongString = "";
-			if (location != null)
-			{
-				double lat = location.getLatitude();
-				double lng = location.getLongitude();
-				latLongString = "Lat:" + lat + ", Long:" + lng;
-
-				InfoBar.setText(this, "T'es localisé: " + Adresse.getAddress(startPoint, this), true);
-			} else
-			{
-				InfoBar.setText(this, "Ta position actuel n'a pas été trouvé !" + latLongString, true);
-			}
-		} catch (Exception e)
-		{
-			Log.e("Catch", "> updateUserInterface() - Exception : " + e.getMessage());
-		}
-	}
-	
-    private LocationListener myLocationListener = new LocationListener()
-    {
-		public void onLocationChanged(Location location)
-		{
-			updateLoc(location);
-		}
-		
-		public void onProviderDisabled(String provider){
-			
-		}
-		
-		public void onProviderEnabled(String provider){
-			
-		}
-		
-		public void onStatusChanged(String provider, int status, Bundle extras){
-			
-		}
-    };
-
 
 	public void onProviderDisabled(String provider) {}
 
-	public void onProviderEnabled(String provider) 
-	{
-		String msg = String.format(getResources().getString(R.string.provider_enabled), provider);
-		Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-	}
+	public void onProviderEnabled(String provider) {}
 
-	public void onStatusChanged(String provider, int status, Bundle extras) {
-		String newStatus = "";
-		switch (status) {
-			case LocationProvider.OUT_OF_SERVICE:
-				newStatus = "OUT_OF_SERVICE";
-				break;
-			case LocationProvider.TEMPORARILY_UNAVAILABLE:
-				newStatus = "TEMPORARILY_UNAVAILABLE";
-				break;
-			case LocationProvider.AVAILABLE:
-				newStatus = "AVAILABLE";
-				break;
-		}
-		String msg = String.format(getResources().getString(R.string.provider_disabled), provider, newStatus);
-		Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-	}
+	public void onStatusChanged(String provider, int status, Bundle extras) {}
 	
 	/**
 	 * Procédure qui s'occupe de mettre à jours certaines variables
@@ -1087,55 +985,6 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 			return false;
 		}
 	};
-	
-	//------------ Routes et Itinéraires
-    
-	private void putRoadNodes(Road road)
-	{
-		roadNodeMarkers.removeAllItems();
-		Drawable marker = getResources().getDrawable(R.drawable.marker_node);
-		int n = road.mNodes.size();
-		TypedArray iconIds = getResources().obtainTypedArray(R.array.direction_icons);
-		for (int i = 0; i < n; i++)
-		{
-			RoadNode node = road.mNodes.get(i);
-			String instructions = (node.mInstructions == null ? "" : node.mInstructions);
-			ExtendedOverlayItem nodeMarker = new ExtendedOverlayItem("Step " + (i + 1), instructions, node.mLocation, this);
-			nodeMarker.setSubDescription(road.getLengthDurationText(node.mLength, node.mDuration));
-			nodeMarker.setMarkerHotspot(OverlayItem.HotspotPlace.CENTER);
-			nodeMarker.setMarker(marker);
-			int iconId = iconIds.getResourceId(node.mManeuverType, R.drawable.ic_empty);
-			if (iconId != R.drawable.ic_empty)
-			{
-				Drawable icon = getResources().getDrawable(iconId);
-				nodeMarker.setImage(icon);
-			}
-			roadNodeMarkers.addItem(nodeMarker);
-		}
-	}
-	
-	void updateUIWithRoad(Road road)
-	{
-		roadNodeMarkers.removeAllItems();
-		List<Overlay> mapOverlays = map.getOverlays();
-		if (roadOverlay != null){
-			mapOverlays.remove(roadOverlay);
-		}
-		if (road == null)
-			return;
-		if (road.mStatus == Road.STATUS_DEFAULT)
-			Toast.makeText(map.getContext(), "We have a problem to get the route", Toast.LENGTH_SHORT).show();
-		roadOverlay = RoadManager.buildRoadOverlay(road, map.getContext());
-		Overlay removedOverlay = mapOverlays.set(1, roadOverlay);
-			//we set the road overlay at the "bottom", just above the MapEventsOverlay,
-			//to avoid covering the other overlays. 
-		mapOverlays.add(removedOverlay);
-		putRoadNodes(road);
-		map.invalidate();
-		//Set route info in the text view:
-		//((TextView)findViewById(R.id.routeInfo)).setText(road.getLengthDurationText(-1));
-		InfoBar.setText(this, road.getLengthDurationText(-1), true);
-    }
 	
 	/**
 	 * Fonction qui relocalise l'utilisateur en centrant sur la carte
