@@ -1,7 +1,5 @@
 package fr.univsavoie.ltp.client.map;
 
-import com.actionbarsherlock.app.SherlockActivity;
-
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
@@ -30,19 +28,16 @@ public class Popup
 	/*
 	 * Variables
 	 */
-	
 	private MainActivity activity;
 	
 	
 	/*
 	 * Constructeur
 	 */
-	
 	public Popup(MainActivity pActivity)
 	{
-		this.activity = pActivity;
+		activity = pActivity;
 	}
-	
 	
 	/*
 	 * Méthodes
@@ -82,7 +77,6 @@ public class Popup
 		// Displaying the popup at the specified location, + offsets.
 		this.activity.findViewById(R.id.layoutMain).post(new Runnable() 
 		{
-			@Override
 			public void run() 
 			{
 				popupUserInfos.showAtLocation(layout, Gravity.CENTER, OFFSET_X, OFFSET_Y);
@@ -97,7 +91,6 @@ public class Popup
 		Button close = (Button) layout.findViewById(R.id.close);
 		close.setOnClickListener(new OnClickListener() 
 		{
-			@Override
 			public void onClick(View v) {
 				popupUserInfos.dismiss();
 			}
@@ -138,7 +131,6 @@ public class Popup
 		// Displaying the popup at the specified location, + offsets.
 		this.activity.findViewById(R.id.layoutMain).post(new Runnable() 
 		{
-			@Override
 			public void run() 
 			{
 				popupPublishStatus.showAtLocation(layout, Gravity.CENTER, OFFSET_X, OFFSET_Y);
@@ -153,7 +145,6 @@ public class Popup
 		Button publish = (Button) layout.findViewById(R.id.btStatusPublish);
 		publish.setOnClickListener(new OnClickListener() 
 		{
-			@Override
 			public void onClick(View v) 
 			{
 				EditText userStatus = (EditText) layout.findViewById(R.id.fieldUserStatus);				
@@ -210,7 +201,6 @@ public class Popup
 		// Displaying the popup at the specified location, + offsets.
 		this.activity.findViewById(R.id.layoutMain).post(new Runnable() 
 		{
-			@Override
 			public void run() 
 			{
 				popupGuest.showAtLocation(layout, Gravity.CENTER, OFFSET_X, OFFSET_Y);
@@ -225,7 +215,6 @@ public class Popup
         Button btLogin = (Button) layout.findViewById(R.id.btnPopupLogin);
         btLogin.setOnClickListener(new OnClickListener() 
         {
-        	@Override
             public void onClick(View view) 
             {
         		// La constante CODE_MON_ACTIVITE représente l’identifiant de la requête
@@ -242,7 +231,6 @@ public class Popup
         Button btSignup = (Button) layout.findViewById(R.id.btnPopupSignup);
         btSignup.setOnClickListener(new OnClickListener() 
         {
-        	@Override
             public void onClick(View view) 
             {        		
         		// La constante CODE_MON_ACTIVITE représente l’identifiant de la requête
@@ -259,7 +247,6 @@ public class Popup
 		Button close = (Button) layout.findViewById(R.id.btnPopupClose);
 		close.setOnClickListener(new OnClickListener() 
 		{
-			@Override
 			public void onClick(View v) 
 			{
 				popupGuest.dismiss();

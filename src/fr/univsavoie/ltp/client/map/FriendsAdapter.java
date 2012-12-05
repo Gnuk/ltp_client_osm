@@ -22,19 +22,16 @@ public class FriendsAdapter extends BaseAdapter
 		this.friends = pFriends;
 	}
 	
-	@Override
 	public int getCount() 
 	{
 		return friends.size();
 	}
-
-	@Override
+	
 	public Object getItem(int position) 
 	{
 		return friends.get(position);
 	}
-
-	@Override
+	
 	public long getItemId(int position) 
 	{
 		return position;
@@ -47,12 +44,11 @@ public class FriendsAdapter extends BaseAdapter
 		TextView tvLong;
 		TextView tvLat;
 	}
-
-	@Override
+	
 	public View getView(int position, View convertView, ViewGroup parent) 
 	{
 		ViewHolder holder;
-
+		
 		if (convertView == null) 
 		{
 			holder = new ViewHolder();
@@ -62,15 +58,16 @@ public class FriendsAdapter extends BaseAdapter
 			holder.tvLong = (TextView) convertView.findViewById(R.id.tvLong);
 			holder.tvLat = (TextView) convertView.findViewById(R.id.tvLat);
 			convertView.setTag(holder);
-		} else {
+		} else
+		{
 			holder = (ViewHolder) convertView.getTag();
 		}
-
+		
 		holder.tvName.setText(friends.get(position).getNom());
 		holder.tvStatus.setText(friends.get(position).getStatus());
 		holder.tvLong.setText(String.valueOf(friends.get(position).getLongitude()));
 		holder.tvLat.setText(String.valueOf(friends.get(position).getLatitude()));
-
+		
 		return convertView;
 	}
 }

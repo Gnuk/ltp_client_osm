@@ -1,7 +1,5 @@
 package fr.univsavoie.ltp.client;
 
-import com.actionbarsherlock.app.SherlockActivity;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -16,48 +14,47 @@ public class SignupActivity extends Activity
 	SharedPreferences settings;
 	SharedPreferences.Editor editor;
 	Intent resultIntent;
-    
-    /** Called when the activity is first created. */
-    @Override
+	
+	/** Méthode appelée la première fois lors de la création de la classe. */
 	public void onCreate(Bundle savedInstanceState) 
-    {
-        super.onCreate(savedInstanceState);
-        
-        // Create settings activity
-        setContentView(R.layout.activity_signup);
-        
-        // Ecouteur d'évènement sur le bouton de connexion
-        Button btRegister = (Button) findViewById(R.id.btnRegister);
-        btRegister.setOnClickListener(new View.OnClickListener()
-        {
-			@Override
+	{
+		super.onCreate(savedInstanceState);
+		
+		// Create settings activity
+		setContentView(R.layout.activity_signup);
+		
+		// Ecouteur d'évènement sur le bouton de connexion
+		Button btRegister = (Button) findViewById(R.id.btnRegister);
+		btRegister.setOnClickListener(new View.OnClickListener()
+		{
 			public void onClick(View v)
 			{
 				// Si on a pas d'erreur lors de la vérification des infos saisies dans
 				// les champs, on valide et envoie l'inscription au serveur LTP.
 				if (checkFields())
 				{
-			        // Renvoyer une valeur à l'activité principal
-			        setResult(Activity.RESULT_OK);
-			        
-			        // On ferme cette activité
+					// Renvoyer une valeur à l'activité principal
+					setResult(Activity.RESULT_OK);
+					
+					// On ferme cette activité
 					finish();
 				}
 			}
 		});
 	}
-    
-    /**
-     * Procédure pour vérifier les informations saisies dans les champs
-     * @return Vrai si pas d'erreur, Faux si erreurs...
-     */
-    private boolean checkFields()
-    {
-    	boolean fieldsOk = true;
-    	
-    	/*
-    	 * Verifications champ login
-    	 */
+	
+	/**
+	 * Procédure pour vérifier les informations saisies dans les champs
+	 * 
+	 * @return Vrai si pas d'erreur, Faux si erreurs...
+	 */
+	private boolean checkFields()
+	{
+		boolean fieldsOk = true;
+
+		/*
+		 * Verifications champ login
+		 */
 		EditText login = (EditText)findViewById(R.id.fieldId);
 		if( login.getText().toString().length() == 0 )
 		{
@@ -115,32 +112,34 @@ public class SignupActivity extends Activity
 		}
 		
 		return fieldsOk;
-    }
-    
-    /**
-     * Fonction qui vérifie le mot de passe saisie
-     * @param pPassword
-     * @param pConfirmPassword
-     * @return Vrai si mot de passe de vérif identique a celui de base
-     */
-    public boolean checkPassWordAndConfirmPassword(String pPassword,String pConfirmPassword) 
-    {
-        boolean pstatus = false;
-        if (pConfirmPassword != null && pPassword != null) 
-        {
-          if (pPassword.equals(pConfirmPassword)) 
-          {
-               pstatus = true;
-          } 
-        }
-       return pstatus;
-   }
+	}
 	
-	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-	    if ( keyCode == KeyEvent.KEYCODE_MENU ) {
-	        return true;
-	    }
-	    return super.onKeyDown(keyCode, event);
+	/**
+	 * Fonction qui vérifie le mot de passe saisie
+	 * 
+	 * @param pPassword
+	 * @param pConfirmPassword
+	 * @return Vrai si mot de passe de vérif identique a celui de base
+	 */
+	public boolean checkPassWordAndConfirmPassword(String pPassword, String pConfirmPassword)
+	{
+		boolean pstatus = false;
+		if (pConfirmPassword != null && pPassword != null)
+		{
+			if (pPassword.equals(pConfirmPassword))
+			{
+				pstatus = true;
+			}
+		}
+		return pstatus;
+	}
+	
+	public boolean onKeyDown(int keyCode, KeyEvent event)
+	{
+		if (keyCode == KeyEvent.KEYCODE_MENU)
+		{
+			return true;
+		}
+		return super.onKeyDown(keyCode, event);
 	}
 }

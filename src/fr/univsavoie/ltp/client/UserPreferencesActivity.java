@@ -8,21 +8,19 @@ import android.view.KeyEvent;
 
 public class UserPreferencesActivity extends PreferenceActivity 
 {
-	@Override
 	protected void onCreate(Bundle savedInstanceState) 
 	{
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(R.xml.user_preferences);
 	}
 	
-	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) 
 	{
 		super.onKeyDown(keyCode, event);
 		if (keyCode == KeyEvent.KEYCODE_BACK) 
 		{
 			Intent result = new Intent("Complete");
-    		setResult(Activity.RESULT_OK, result);
+			setResult(Activity.RESULT_OK, result);
 			finish();
 			return true;
 		}
