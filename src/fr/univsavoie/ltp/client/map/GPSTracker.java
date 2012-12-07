@@ -13,8 +13,8 @@ import android.os.IBinder;
 import android.provider.Settings;
 import android.util.Log;
  
-public class GPSTracker extends Service implements LocationListener {
- 
+public class GPSTracker extends Service implements LocationListener 
+{
     private final Context mContext;
  
     // flag for GPS status
