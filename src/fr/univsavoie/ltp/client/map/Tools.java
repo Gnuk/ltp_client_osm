@@ -2,22 +2,42 @@ package fr.univsavoie.ltp.client.map;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.osmdroid.bonuspack.location.GeocoderNominatim;
 import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.MapController;
+import org.osmdroid.views.MapView;
 
 import fr.univsavoie.ltp.client.MainActivity;
 
 import android.location.Address;
 
-public class Adresse
+/**
+ * Classes outils divers lié a l'interaction avec la carte.
+ */
+public class Tools 
 {
-    /** 
-     * Reverse Geocoding
-     */
-    public static String getAddress(GeoPoint p, MainActivity mainActivity)
+	/* Variables globales */
+	private MainActivity mainActivity;
+	
+	/**
+	 * Constructeur
+	 * @param pActivity Instance de l'activité en cours
+	 */
+	public Tools(MainActivity pActivity)
+	{
+		this.mainActivity = pActivity;
+	}
+	
+	/**
+	 * Fonction qui reverse les coordonnées GPS en nom de ville, rue...
+	 * @param p Points GPS (latitude, longitude)
+	 * @return L'adresse postale
+	 */
+    public String getAddress(GeoPoint p)
     {
-		GeocoderNominatim geocoder = new GeocoderNominatim(mainActivity);
+		GeocoderNominatim geocoder = new GeocoderNominatim(this.mainActivity);
 		String theAddress;
 		try
 		{
@@ -54,4 +74,14 @@ public class Adresse
 			return "";
 		}
     }
+    
+    /**
+     * Fonction qui relocalise l'utilisateur en centrant sur la carte
+     */
+    public void relocateUser(MapController pMapController, MapView pMapView, GPSTracker pGPS)
+    {
+    	pMapController.setCenter(new GeoPoint(pGPS.getLatitude(), pGPS.getLongitude()));   	
+    	pMapView.invalidate();
+    }
+
 }
