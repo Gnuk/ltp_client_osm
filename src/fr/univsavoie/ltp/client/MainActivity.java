@@ -1,6 +1,5 @@
 package fr.univsavoie.ltp.client;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -62,11 +61,9 @@ import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Location;
 import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.MenuInflater;
@@ -91,7 +88,7 @@ import android.widget.Toast;
 /**
  * MainActivity l'activité principale de l'application Android
  */
-public class MainActivity extends SherlockActivity implements MapEventsReceiver, LocationListener
+public class MainActivity extends SherlockActivity implements MapEventsReceiver
 {
 	/* --------------------------------
 	 * Variables globales de l'activité
@@ -983,24 +980,6 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		}
 	}*/
 	
-	//------------ LocationListener implementation
-	public void onLocationChanged(final Location location)
-	{
-		myLocationOverlay.setLocation(new GeoPoint(location));
-	}
-
-	public void onProviderDisabled(String provider) {
-		
-	}
-
-	public void onProviderEnabled(String provider) {
-		
-	}
-
-	public void onStatusChanged(String provider, int status, Bundle extras){
-		
-	}
-	
 	/**
 	 * Procédure qui s'occupe de mettre à jours certaines variables
 	 * locales à l'activité par rapport à la session utilisateur, affichage
@@ -1223,24 +1202,4 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
     	OverlayItem newMyLocationItem = new OverlayItem("My Location", "My Location", overlocGeoPoint);
     	overlayItemArray.add(newMyLocationItem);
 	}
-    
-    private LocationListener myLocationListener = new LocationListener()
-    {
-		public void onLocationChanged(Location location)
-		{
-			updateLoc(location);
-		}
-		
-		public void onProviderDisabled(String provider){
-			
-		}
-		
-		public void onProviderEnabled(String provider){
-			
-		}
-		
-		public void onStatusChanged(String provider, int status, Bundle extras){
-			
-		}
-    };
 }
