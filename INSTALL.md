@@ -2,15 +2,15 @@
 
 ## Installation du projet sous eclipse
 
-### Prérequis :
+### Prérequis
 
 - un eclipse configuré avec le greffon egit et le SDK Android de google.
 
-### Lien du projet :
+### Lien du projet
 
 - https://github.com/Gnuk/ltp_client_osm.git
 
-### Installation :
+### Installation
 
 - lancer eclipse
 - aller dans "File"->"Import...", puis sélectionner "Projects from Git" dans l'onglet "Git"
@@ -20,7 +20,7 @@
 - choisir le chemin de la bibliothéque dans le champ "Root Directory", la bibliothéque se trouve dans le dossier "libs/ActionBarSherlock" du projet
 - le projet est maintenant importé
 
-### Erreur éventuel :
+### Erreur éventuel
 
 Mauvaise importation de la bibliothéque "ActionBarSherlock". Afin de résoudre cette erreur, il faut aller dans les configurations du projet.
 
