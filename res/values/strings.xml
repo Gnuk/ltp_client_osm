@@ -44,4 +44,7 @@
     <string name="itinerary">Itinerary</string>
     <string name="poi_list">POI List</string>
     
+    <string name="history_status">History of your status</string>
+    <string name="latest_status">Your latests published statues</string>
+    
 </resources>

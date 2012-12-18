@@ -19,6 +19,12 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:visibility="gone" />
+ 
+    <TextView
+        android:id="@+id/tvLat"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />    
     
     <TextView
         android:id="@+id/tvLong"
@@ -26,10 +32,6 @@
         android:layout_height="wrap_content"
         android:visibility="gone" />
           
-    <TextView
-        android:id="@+id/tvLat"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone" />
+
    
 </LinearLayout>

@@ -11,8 +11,7 @@ import android.widget.EditText;
 
 public class LoginActivity extends Activity 
 {
-	SharedPreferences settings;
-	SharedPreferences.Editor editor;
+
 	Intent resultIntent;
     
     /** Called when the activity is first created. */

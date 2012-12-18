@@ -1,18 +1,18 @@
 package fr.univsavoie.ltp.client.map;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
+import java.util.List;
 
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpVersion;
+import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.AuthState;
 import org.apache.http.auth.Credentials;
@@ -20,11 +20,14 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.BasicResponseHandler;
@@ -36,13 +39,15 @@ import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
+
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.util.Log;
+
 import fr.univsavoie.ltp.client.MainActivity;
 import fr.univsavoie.ltp.client.tools.SimpleSSLSocketFactory;
 
@@ -54,17 +59,31 @@ import fr.univsavoie.ltp.client.tools.SimpleSSLSocketFactory;
 public class Session
 {
 	/*
-	 * Variables
+	 * Variables globale
 	 */
 	
+	// Méthodes Apache HTTP
 	private DefaultHttpClient httpClient;
 	private HttpGet httpGet;
-	private ResponseHandler<String> responseHandler;
+	private HttpPost httpPost;
+	private HttpPut httpPut;
+	
+	// Appel d'instance de classe
 	private MainActivity activity;
+	
+	// Traitement des données JSON
+	private JSONArray lastJSONArray;
+	private List<NameValuePair> listNameValuePair;
+	private String JSONDatas;
 	
 	
 	/*
 	 * Constructeur
+	 */
+	
+	/**
+	 * Constructeur pour récupérer la session en cours
+	 * @param activite
 	 */
 	public Session(MainActivity activite)
 	{
@@ -76,25 +95,23 @@ public class Session
 	 * Méthodes
 	 */
 	
-	 /**
-     * S'authentifier auprès du service LocalizeTeaPot
+    /**
+     * Procédure qui s'authentifie sur le serveur REST avec les données utilisateurs de façon sécurisé (protocole HTTPS).
+     * Appeler secureAuth() avant chaque nouvelles requêtes HTTP (get, post, ...)
      */
-    public final void auth() 
+	private void secureAuth() 
 	{
-		try
+		try 
 		{
 			// Instance de SharedPreferences pour lire les données dans un fichier
-			SharedPreferences myPrefs = activity.getSharedPreferences("UserPrefs", this.activity.MODE_WORLD_READABLE); 
+			SharedPreferences myPrefs = activity.getSharedPreferences("UserPrefs", activity.MODE_WORLD_READABLE);
 			String login = myPrefs.getString("Email", null);
 			String password = myPrefs.getString("Password", null);
-			
-			Log.i("Watch", "login : " + login);
-			Log.i("Watch", "password : " + password);
-			
+
 			HttpRequestInterceptor preemptiveAuth = new HttpRequestInterceptor() 
 			{
-				public void process(final HttpRequest request,
-						final HttpContext context) throws HttpException, IOException {
+				public void process(final HttpRequest request, final HttpContext context) throws HttpException, IOException 
+				{
 					AuthState authState = (AuthState) context.getAttribute(ClientContext.TARGET_AUTH_STATE);
 					CredentialsProvider credsProvider = (CredentialsProvider) context.getAttribute(ClientContext.CREDS_PROVIDER);
 					HttpHost targetHost = (HttpHost) context.getAttribute(ExecutionContext.HTTP_TARGET_HOST);
@@ -112,9 +129,7 @@ public class Session
 				}
 			};
 
-			// Setup a custom SSL Factory object which simply ignore the
-			// certificates
-			// validation and accept all type of self signed certificates
+			// Setup a custom SSL Factory object which simply ignore the certificates validation and accept all type of self signed certificates
 			SSLSocketFactory sslFactory = new SimpleSSLSocketFactory(null);
 			sslFactory.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
 
@@ -123,117 +138,286 @@ public class Session
 			HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
 			HttpProtocolParams.setContentCharset(params, HTTP.UTF_8);
 
-			// Register the HTTP and HTTPS Protocols. For HTTPS, register our
-			// custom SSL Factory object.
+			// Register the HTTP and HTTPS Protocols. For HTTPS, register our custom SSL Factory object.
 			SchemeRegistry registry = new SchemeRegistry();
-			//registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+			// registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
 			registry.register(new Scheme("https", sslFactory, 443));
 
-			// Create a new connection manager using the newly created registry
-			// and then create a new HTTP client using this connection manager
-			ClientConnectionManager ccm = new ThreadSafeClientConnManager( params, registry);
+			// Create a new connection manager using the newly created registry and then create a new HTTP client using this connection manager
+			ClientConnectionManager ccm = new ThreadSafeClientConnManager(params, registry);
 
-			setHttpClient(new DefaultHttpClient(ccm, params));
+			httpClient = new DefaultHttpClient(ccm, params);
 
 			CredentialsProvider authCred = new BasicCredentialsProvider();
 			Credentials creds = new UsernamePasswordCredentials(login, password);
 			authCred.setCredentials(AuthScope.ANY, creds);
 
-			getHttpClient().addRequestInterceptor(preemptiveAuth, 0);
-			getHttpClient().setCredentialsProvider(authCred);
-			
-			setHttpGet(new HttpGet("https://jibiki.univ-savoie.fr/ltpdev/rest.php/api/1/statuses"));
-			setResponseHandler(new BasicResponseHandler());
+			httpClient.addRequestInterceptor(preemptiveAuth, 0);
+			httpClient.setCredentialsProvider(authCred);
 		} 
-		catch (KeyManagementException e1) 
+		catch (KeyManagementException e) 
 		{
-			Log.e("Catch", "> auth() - KeyManagementException: " + e1.getMessage());
+			e.printStackTrace();
 		} 
-		catch (NoSuchAlgorithmException e1) 
+		catch (UnrecoverableKeyException e) 
 		{
-			Log.e("Catch", "> auth() - NoSuchAlgorithmException: " + e1.getMessage());
+			e.printStackTrace();
 		} 
-		catch (KeyStoreException e1) 
+		catch (NoSuchAlgorithmException e) 
 		{
-			Log.e("Catch", "> auth() - KeyStoreException: " + e1.getMessage());
+			e.printStackTrace();
 		} 
-		catch (UnrecoverableKeyException e1) 
+		catch (KeyStoreException e) 
 		{
-			Log.e("Catch", "> auth() - UnrecoverableKeyException: " + e1.getMessage());
+			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Classe spéciale AsyncTask pour faire proprement des requêtes HTTP
+	 * Permet de lancer la commande GET pour récupérer la liste des amis de l'utilisateur connecté
+	 */
+    class HttpMapGetFriendsTask extends AsyncTask<String, Object, String>
+    {
+        protected String doInBackground(String... url) 
+        {
+        	String httpResponse = null;
+            try 
+            {
+            	ResponseHandler<String> responseHandler = new BasicResponseHandler();
+            	httpResponse = httpClient.execute(httpGet, responseHandler);
+            }
+            catch (Exception e) 
+            {
+            	Log.e("Catch", "RetreiveHttpClientTask: " + e.getLocalizedMessage());
+            }
+			return httpResponse;
+        }
+
+        protected void onPostExecute(String result) 
+        {
+        	try 
+        	{
+            	// Créer des objets JSON pour récupérer les informations récupéré sur le serveur REST
+    			JSONObject potes = new JSONObject(result);		
+    			JSONArray potesArray = potes.getJSONObject("ltp").getJSONArray("friends");
+    			activity.parseJSONResult(potesArray);
+			} 
+        	catch (Exception e) 
+        	{
+				Log.e("Catch", "RetreiveHttpClientTask / onPostExecute : " + e.getLocalizedMessage());
+			}
+        }
+     }
+    
+	/**
+	 * Classe spéciale AsyncTask pour faire proprement des requêtes HTTP
+	 * Permet de lancer la commande GET pour recuperer les derniers status de l'utilisateur connecté
+	 */
+    class HttpMapGetStatusesTask extends AsyncTask<String, Object, String>
+    {
+        protected String doInBackground(String... url) 
+        {
+        	String httpResponse = null;
+            try 
+            {
+            	ResponseHandler<String> responseHandler = new BasicResponseHandler();
+            	httpResponse = httpClient.execute(httpGet, responseHandler);
+            }
+            catch (Exception e) 
+            {
+            	Log.e("Catch", "RetreiveHttpClientTask: " + e.getLocalizedMessage());
+            }
+			return httpResponse;
+        }
+
+        protected void onPostExecute(String result) 
+        {
+        	try 
+        	{
+            	// Créer des objets JSON pour récupérer les informations récupéré sur le serveur REST
+    			JSONObject statuses = new JSONObject(result);		
+    			JSONArray statusesArray = statuses.getJSONObject("ltp").getJSONArray("statuses");
+    			activity.getPopup().popupGetStatus(statusesArray);
+			} 
+        	catch (Exception e) 
+        	{
+				Log.e("Catch", "HttpMapGetStatusesTask / onPostExecute : " + e.getLocalizedMessage());
+			}
+        }
+     }
+    
+	/**
+	 * Classe spéciale AsyncTask pour faire proprement des requêtes HTTP
+	 * Permet de lancer la commande POST pour l'envoie de status
+	 */
+    class HttpPostStatusesTask extends AsyncTask<String, Object, String>
+    {
+        protected String doInBackground(String... json) 
+        {
+        	String httpResponse = null;
+            try 
+            {
+            	// Créer des objets JSON pour récupérer les informations récupéré sur le serveur REST
+    			//JSONObject status = new JSONObject();	
+    			
+                // Remplir l'objet json des données client
+                /*for (NameValuePair nameValuePair : getListNameValuePair()) {
+                	status.put(nameValuePair.getName(), nameValuePair.getValue());
+				}*/
+            	ResponseHandler<String> responseHandler = new BasicResponseHandler();
+            	
+                httpPost.setEntity(new ByteArrayEntity(json[0].getBytes("UTF8")));
+                httpPost.setHeader( "Content-Type", "application/json");
+                
+            	httpResponse = httpClient.execute(httpPost, responseHandler);
+            }
+            catch (Exception e) 
+            {
+            	Log.e("Catch", "HttpPostStatusesTask: " + e.getLocalizedMessage());
+            }
+			return httpResponse;
+        }
+
+        protected void onPostExecute(String result) 
+        {
+        	
+        }
+     }
+    
+	/**
+	 * Classe spéciale AsyncTask pour faire proprement des requêtes HTTP
+	 * Permet de lancer la commande PUT pour le Tracker
+	 */
+    class HttpPutTrackerTask extends AsyncTask<String, Object, String>
+    {
+        protected String doInBackground(String... json) 
+        {
+        	String httpResponse = null;
+            try 
+            {
+            	Log.d("Watch", "JSON: " + json[0]);
+            	
+            	ResponseHandler<String> responseHandler = new BasicResponseHandler();
+            	
+            	httpPut.setEntity(new ByteArrayEntity(json[0].getBytes("UTF8")));
+            	httpPut.setHeader( "Content-Type", "application/json");
+                
+            	httpResponse = httpClient.execute(httpPut, responseHandler);
+            }
+            catch (Exception e) 
+            {
+            	Log.e("Catch", "HttpPutTrackerTask: " + e.getLocalizedMessage());
+            }
+			return httpResponse;
+        }
+
+        protected void onPostExecute(String result) 
+        {
+        	try 
+        	{
+            	// Créer des objets JSON pour récupérer les informations récupéré sur le serveur REST
+    			JSONObject statuses = new JSONObject(result);		
+    			JSONArray statusesArray = statuses.getJSONObject("ltp").getJSONArray("statuses");
+    			activity.getPopup().popupGetStatus(statusesArray);
+			} 
+        	catch (Exception e) 
+        	{
+				Log.e("Catch", "HttpPutTrackerTask / onPostExecute : " + e.getLocalizedMessage());
+			}
+        }
+    }
     
     /**
-     * Fonction qui recupère la liste des amis de l'utilisateur connecté
-     * @return Retourne un JSONArray a utilisé dans une boucle pour extraire les données JSON
+     * Méthode POST en JSON pour envoyé des données sur le serveur REST
+     * @param pUrl 		URL du service
+     * @param pType 	Type du service
+     * @param pDatas 	Données a envoyé (au format JSON)
      */
-    public final JSONArray parseFriends()
+    public final void postJSON(String pUrl, String pType, String pDatas)
     {
-    	String response = null;
-        
         try 
         {
-        	// FIX POUR EVITER QUE L'APPLI PLANTE SUR DES VERSION ANDROID AU SDK > 8
-        	int SDK_INT = android.os.Build.VERSION.SDK_INT;
-			if (SDK_INT>8) 
+        	// Etablir une connexion sécurisé entre l'application client et serveur
+			secureAuth();
+			
+			// Nouvelle requete http de type POST
+			httpPost = new HttpPost(pUrl);
+			
+			if (pType == "FRIENDS")
 			{
-				try 
-				{
-			        Class<?> strictModeClass = Class.forName("android.os.StrictMode", true, Thread.currentThread()
-			                .getContextClassLoader());
-
-			        Class<?> threadPolicyClass = Class.forName("android.os.StrictMode$ThreadPolicy", true, Thread
-			                .currentThread().getContextClassLoader());
-
-			        Class<?> threadPolicyBuilderClass = Class.forName("android.os.StrictMode$ThreadPolicy$Builder", true,
-			                Thread.currentThread().getContextClassLoader());
-
-			        Method setThreadPolicyMethod = strictModeClass.getMethod("setThreadPolicy", threadPolicyClass);
-
-			        Method detectAllMethod = threadPolicyBuilderClass.getMethod("detectAll");
-			        Method penaltyMethod = threadPolicyBuilderClass.getMethod("penaltyLog");
-			        Method buildMethod = threadPolicyBuilderClass.getMethod("build");
-
-			        Constructor<?> threadPolicyBuilderConstructor = threadPolicyBuilderClass.getConstructor();
-			        Object threadPolicyBuilderObject = threadPolicyBuilderConstructor.newInstance();
-
-			        Object obj = detectAllMethod.invoke(threadPolicyBuilderObject);
-
-			        obj = penaltyMethod.invoke(obj);
-			        Object threadPolicyObject = buildMethod.invoke(obj);
-			        setThreadPolicyMethod.invoke(strictModeClass, threadPolicyObject);
-
-			    } 
-				catch (Exception ex) 
-				{
-					Log.e("Catch", "> parseFriends() - SDK_ERR: " + ex.getMessage());
-			    }
+				//new HttpMapGetFriendsTask().execute();
+			} 
+			else if (pType == "STATUSES")
+			{
+				new HttpPostStatusesTask().execute(pDatas);
+			} 
+			else if (pType == "TRACKER")
+			{
+				//new HttpMapPostTrackerTask().execute();
 			}
-        	
-			// Recuperer la reponse de la connexion REST
-        	response = getHttpClient().execute(getHttpGet(), getResponseHandler());
-
-        	// Créer des objets JSON pour récupérer les informations récupéré sur le serveur REST
-			JSONObject potes = new JSONObject(response);		
-			JSONArray potesArray = potes.getJSONObject("ltp").getJSONArray("statuses");
-	
-			// On retourne la liste des amis
-			return potesArray;
 		} 
-        catch (IOException e) 
-        {
-			Log.e("Catch", "> parseFriends() - IOException: " + e.getMessage());
-		} 
-        catch (JSONException e) 
-        {
-			Log.e("Catch", "> parseFriends() - JSONException: " + e.getMessage());
-		}
         catch (Exception e) 
         {
-			Log.e("Catch", "> parseFriends() - Exception: " + e.getMessage());
+			Log.e("Catch", "> postJSON() - Exception: " + e.getMessage());
 		}
-        
-        return null;
+    }
+    
+    /**
+     * Méthode GET pour la récuperation des données sur le serveur REST
+     * @param pUrl		URL du service
+     * @param pType 	Nom du service
+     */
+    public final void getJSON(String pUrl, String pType)
+    {
+        try 
+        {
+        	// Etablir une connexion sécurisé entre l'application client et serveur
+			secureAuth();
+			
+			// Nouvelle requete http de type GET
+			httpGet = new HttpGet(pUrl);
+			
+			if (pType == "FRIENDS")
+			{
+				new HttpMapGetFriendsTask().execute();
+			} 
+			else if (pType == "STATUSES")
+			{
+				new HttpMapGetStatusesTask().execute();
+			}
+		} 
+        catch (Exception e) 
+        {
+			Log.e("Catch", "> getJSON() - Exception: " + e.getMessage());
+		} 
+    }
+    
+    /**
+     * Méthode PUT pour l'envoie de données sur le serveur REST
+     * @param pUrl		Adresse du service
+     * @param pType		Type de service
+     * @param pDatas	Données a envoyé au format JSON
+     */
+    public final void putJSON(String pUrl, String pType, String pDatas)
+    {
+        try 
+        {
+        	// Etablir une connexion sécurisé entre l'application client et serveur
+			secureAuth();
+			
+			// Nouvelle requete http de type GET
+			httpPut = new HttpPut(pUrl);
+			
+			if (pType == "TRACKER")
+			{
+				new HttpPutTrackerTask().execute(pDatas);
+			}
+		} 
+        catch (Exception e) 
+        {
+			Log.e("Catch", "> putJSON() - Exception: " + e.getLocalizedMessage());
+		} 
     }
     
     /**
@@ -253,39 +437,46 @@ public class Session
 		this.activity.finish();
 		this.activity.startActivity(intent);
     }
-
+    
+    /**
+     * On remplit le JSONArray avec le dernier contenu de la requete REST.
+     * Ayez donc bien a l'esprit que cette méthode est remplit avec les dernieres
+     * données recuperer sur le serveur REST !
+     * @param pJSONArray L'array peuplé de données utiles
+     * @return Le meme array passé en paramètre !
+     */
+    public JSONArray fillJSONArray(JSONArray pJSONArray)
+    {
+    	return pJSONArray;
+    }
+    
     
     /*
-     * Getters & Setters
+     * Getteurs & Setteurs
+     * A les appeler quand on veux traiter des requêtes REST d'une page a une autre
      */
-    
-	public DefaultHttpClient getHttpClient() 
-	{
-		return httpClient;
+
+	public JSONArray getLastJSONArray() {
+		return lastJSONArray;
 	}
 
-	public void setHttpClient(DefaultHttpClient httpClient) 
-	{
-		this.httpClient = httpClient;
+	public void setLastJSONArray(JSONArray lastJSONArray) {
+		this.lastJSONArray = lastJSONArray;
 	}
 
-	public HttpGet getHttpGet() 
-	{
-		return httpGet;
+	public List<NameValuePair> getListNameValuePair() {
+		return listNameValuePair;
 	}
 
-	public void setHttpGet(HttpGet httpGet) 
-	{
-		this.httpGet = httpGet;
+	public void setListNameValuePair(List<NameValuePair> listNameValuePair) {
+		this.listNameValuePair = listNameValuePair;
 	}
 
-	public ResponseHandler<String> getResponseHandler() 
-	{
-		return responseHandler;
+	public String getJSONDatas() {
+		return JSONDatas;
 	}
 
-	public void setResponseHandler(ResponseHandler<String> responseHandler) 
-	{
-		this.responseHandler = responseHandler;
+	public void setJSONDatas(String jSONDatas) {
+		JSONDatas = jSONDatas;
 	}
 }

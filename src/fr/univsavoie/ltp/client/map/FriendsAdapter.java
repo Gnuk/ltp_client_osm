@@ -41,8 +41,8 @@ public class FriendsAdapter extends BaseAdapter
 	{
 		TextView tvName;
 		TextView tvStatus;
-		TextView tvLong;
 		TextView tvLat;
+		TextView tvLong;
 	}
 	
 	public View getView(int position, View convertView, ViewGroup parent) 
@@ -55,8 +55,8 @@ public class FriendsAdapter extends BaseAdapter
 			convertView = inflater.inflate(R.layout.item_friends, null);
 			holder.tvName = (TextView) convertView.findViewById(R.id.tvName);
 			holder.tvStatus = (TextView) convertView.findViewById(R.id.tvStatus);
-			holder.tvLong = (TextView) convertView.findViewById(R.id.tvLong);
 			holder.tvLat = (TextView) convertView.findViewById(R.id.tvLat);
+			holder.tvLong = (TextView) convertView.findViewById(R.id.tvLong);
 			convertView.setTag(holder);
 		} else
 		{
@@ -65,8 +65,8 @@ public class FriendsAdapter extends BaseAdapter
 		
 		holder.tvName.setText(friends.get(position).getNom());
 		holder.tvStatus.setText(friends.get(position).getStatus());
-		holder.tvLong.setText(String.valueOf(friends.get(position).getLongitude()));
 		holder.tvLat.setText(String.valueOf(friends.get(position).getLatitude()));
+		holder.tvLong.setText(String.valueOf(friends.get(position).getLongitude()));
 		
 		return convertView;
 	}

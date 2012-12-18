@@ -1,9 +1,17 @@
 package fr.univsavoie.ltp.client.map;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,8 +20,10 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.ScrollView;
+import android.widget.SimpleAdapter;
 import android.widget.Toast;
 import fr.univsavoie.ltp.client.LoginActivity;
 import fr.univsavoie.ltp.client.MainActivity;
@@ -55,7 +65,7 @@ public class Popup
 		//final int height = dm.heightPixels;
 		final int width = dm.widthPixels;
 		
-		int popupWidth = width / 2;
+		int popupWidth = (int) (width * 0.75);
 		//int popupHeight = height / 2;
 		
 		// Inflate the popup_layout.xml
@@ -109,7 +119,7 @@ public class Popup
 		//final int height = dm.heightPixels;
 		final int width = dm.widthPixels;
 		
-		int popupWidth = width / 2;
+		int popupWidth = (int) (width * 0.75);
 		//int popupHeight = height / 2;
 		
 		// Inflate the popup_layout.xml
@@ -160,6 +170,18 @@ public class Popup
 				}
 				else
 				{
+					//List<NameValuePair> status = new ArrayList<NameValuePair>(2);
+					//status.add(new BasicNameValuePair("lon", String.valueOf(activity.getLongitude())));
+					//status.add(new BasicNameValuePair("lat", String.valueOf(activity.getLatitude())));
+					//status.add(new BasicNameValuePair("content", userStatus.getText().toString()));
+				   
+					
+					
+					String json = "{\"ltp\":{\"application\":\"Client LTP\",\"status\":{\"lon\" : \"" + String.valueOf(activity.getLongitude()) + "\",\"lat\" : \"" + String.valueOf(activity.getLatitude()) + "\",\"content\" : \"" + userStatus.getText().toString() + "\"}}}";
+					activity.getSession().postJSON("https://jibiki.univ-savoie.fr/ltpdev/rest.php/api/1/statuses", "STATUSES", json);
+					
+					//activity.getSession().sendJson("https://jibiki.univ-savoie.fr/ltpdev/rest.php/api/1/statuses", status);
+					
 					Toast.makeText(activity, "Status mise a jours !", Toast.LENGTH_LONG).show();
 					popupPublishStatus.dismiss();
 				}
@@ -178,8 +200,9 @@ public class Popup
 
 		//final int height = dm.heightPixels;
 		final int width = dm.widthPixels;
+		//final int height = dm.heightPixels;
 		
-		int popupWidth = width / 2;
+		int popupWidth = (int) (width * 0.75);
 		//int popupHeight = height / 2;
 		
 		// Inflate the popup_layout.xml
@@ -253,4 +276,87 @@ public class Popup
 			}
 		});
     }
+    
+    public final void popupGetStatus(JSONArray pStatusesArray)
+    {
+		DisplayMetrics dm = new DisplayMetrics();
+		this.activity.getWindowManager().getDefaultDisplay().getMetrics(dm);
+
+		//final int height = dm.heightPixels;
+		final int width = dm.widthPixels;
+		final int height = dm.heightPixels;
+		
+		int popupWidth = (int) (width * 0.75);
+		int popupHeight = height;
+		
+		// Inflate the popup_layout.xml
+		ScrollView viewGroup = (ScrollView) this.activity.findViewById(R.id.popupGetStatus);
+		LayoutInflater layoutInflater = (LayoutInflater) this.activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		
+		final View layout = layoutInflater.inflate(R.layout.popup_get_status,viewGroup);		
+		layout.setBackgroundResource(R.drawable.popup_gradient);
+
+		// Créer le PopupWindow
+		final PopupWindow popupPublishStatus = new PopupWindow(layout, popupWidth, LayoutParams.WRAP_CONTENT, true);
+		popupPublishStatus.setBackgroundDrawable(new BitmapDrawable());
+		popupPublishStatus.setOutsideTouchable(true);
+
+		// Some offset to align the popup a bit to the right, and a bit down, relative to button's position.
+		final int OFFSET_X = 0;
+		final int OFFSET_Y = 0;
+
+		// Displaying the popup at the specified location, + offsets.
+		this.activity.findViewById(R.id.layoutMain).post(new Runnable() 
+		{
+			public void run() 
+			{
+				popupPublishStatus.showAtLocation(layout, Gravity.CENTER, OFFSET_X, OFFSET_Y);
+			}
+		});
+		
+		/*
+		 * Evenements composants du PopupWindow
+		 */
+		
+		 // Find the ListView resource. 
+		ListView mainListView = (ListView) layout.findViewById( R.id.listViewStatus );
+		
+		ArrayList<HashMap<String,String>> list = new ArrayList<HashMap<String,String>>();
+		
+		SimpleAdapter adapter = new SimpleAdapter(this.activity, list, R.layout.custom_row_view,
+				new String[] {"content","lat","lon"},
+				new int[] {R.id.text1,R.id.text2, R.id.text3}
+		);
+		
+		try 
+		{
+			// Appel REST pour recuperer les status de l'utilisateur connecté
+			//Session session = new Session(this.activity);
+			//session.parseJSONUrl("https://jibiki.univ-savoie.fr/ltpdev/rest.php/api/1/statuses", "STATUSES", "GET");
+			
+			// Parser la liste des amis dans le OverlayItem ArrayList
+			HashMap<String,String> temp;
+	        for (int i = 0 ; (i < 6); i++ )
+	        {
+	        	// Obtenir le status
+	        	JSONObject status = pStatusesArray.getJSONObject(i);
+	        	
+	        	temp = new HashMap<String,String>();
+	    		temp.put("content",status.getString("content"));
+	    		temp.put("lat", String.valueOf(status.getDouble("lat")));
+	    		temp.put("lon", String.valueOf(status.getDouble("lon")));
+	    		list.add(temp);
+	        }
+		} 
+		catch (JSONException jex) 
+		{
+			Log.e("Catch", "popupGetStatus / JSONException : " + jex.getStackTrace());
+		} 
+		catch (Exception ex) 
+		{
+			Log.e("Catch", "popupGetStatus / Exception : " + ex.getLocalizedMessage());
+		}
+		
+		mainListView.setAdapter(adapter);
+    }   
 }
