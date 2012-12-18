@@ -74,7 +74,7 @@
 		            android:layout_width="wrap_content"
 		            android:layout_height="wrap_content"
 		            android:layout_weight="0"
-		            android:text="Search" />
+		            android:text="@string/search" />
 
 		    </TableRow>
 
@@ -97,7 +97,7 @@
 		            android:layout_width="wrap_content"
 		            android:layout_height="wrap_content"
 		            android:layout_weight="0"
-		            android:text="Search" />
+		            android:text="@string/search" />
 
 		    </TableRow>
 
@@ -122,11 +122,9 @@
          android:id="@+id/layoutZoomInOut"
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
-         android:layout_gravity="center_vertical"
-         android:layout_marginBottom="40dp"
-         android:layout_marginLeft="10dp"
+         android:layout_gravity="right|center"
+         android:layout_marginRight="10dp"
          android:alpha="1"
-         android:gravity="right|center"
          android:orientation="vertical" >
 
          <ImageButton
@@ -134,14 +132,16 @@
              android:layout_width="wrap_content"
              android:layout_height="wrap_content"
              android:layout_marginBottom="10dp"
-             android:background="@drawable/bg_striped_blue_img"
+             android:alpha="0.5"
+             android:background="#2B6AD8"
              android:src="@drawable/zoom_in" />
 
          <ImageButton
              android:id="@+id/btZoomOut"
              android:layout_width="wrap_content"
              android:layout_height="wrap_content"
-             android:background="@drawable/bg_striped_blue_img"
+             android:alpha="0.5"
+             android:background="#2B6AD8"
              android:src="@drawable/zoom_out" />
 
      </LinearLayout>
