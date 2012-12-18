@@ -1,6 +1,8 @@
 package fr.univsavoie.ltp.client.map;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -11,6 +13,7 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
+import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
@@ -42,6 +45,7 @@ import org.apache.http.protocol.HttpContext;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -75,6 +79,7 @@ public class Session
 	private JSONArray lastJSONArray;
 	private List<NameValuePair> listNameValuePair;
 	private String JSONDatas;
+	private int code;
 	
 	
 	/*
@@ -105,7 +110,7 @@ public class Session
 		{
 			// Instance de SharedPreferences pour lire les données dans un fichier
 			SharedPreferences myPrefs = activity.getSharedPreferences("UserPrefs", activity.MODE_WORLD_READABLE);
-			String login = myPrefs.getString("Email", null);
+			String login = myPrefs.getString("Login", null);
 			String password = myPrefs.getString("Password", null);
 
 			HttpRequestInterceptor preemptiveAuth = new HttpRequestInterceptor() 
@@ -181,17 +186,26 @@ public class Session
     {
         protected String doInBackground(String... url) 
         {
-        	String httpResponse = null;
+        	String json = null;
+        	
             try 
             {
-            	ResponseHandler<String> responseHandler = new BasicResponseHandler();
-            	httpResponse = httpClient.execute(httpGet, responseHandler);
+            	//ResponseHandler<String> responseHandler = new BasicResponseHandler();
+            	//httpResponse = httpClient.execute(httpGet, responseHandler);
+            	
+            	HttpResponse httpResp = httpClient.execute(httpGet);
+            	setCode(httpResp.getStatusLine().getStatusCode());
+            	
+            	Log.d("Watch", String.valueOf(getCode()));
+            	
+            	BufferedReader reader = new BufferedReader(new InputStreamReader(httpResp.getEntity().getContent(), "UTF-8"));
+            	json = reader.readLine();;
             }
             catch (Exception e) 
             {
             	Log.e("Catch", "RetreiveHttpClientTask: " + e.getLocalizedMessage());
             }
-			return httpResponse;
+			return json;
         }
 
         protected void onPostExecute(String result) 
@@ -209,6 +223,8 @@ public class Session
 			}
         }
      }
+    
+
     
 	/**
 	 * Classe spéciale AsyncTask pour faire proprement des requêtes HTTP
@@ -428,7 +444,7 @@ public class Session
         // Instance de SharedPreferences pour enregistrer des données dans un fichier
         SharedPreferences myPrefs = this.activity.getSharedPreferences("UserPrefs", this.activity.MODE_WORLD_READABLE); // Ici on permet donc la lecture de notre fichier de préférence à toutes les applications
         SharedPreferences.Editor prefsEditor = myPrefs.edit(); // Instance de l'editeur permettant d'écrire dans le fichier
-        prefsEditor.putString("Email", null); // Données
+        prefsEditor.putString("Login", null); // Données
         prefsEditor.putString("Password", null); // Données
         prefsEditor.commit(); // Valider les modifications
         
@@ -478,5 +494,15 @@ public class Session
 
 	public void setJSONDatas(String jSONDatas) {
 		JSONDatas = jSONDatas;
+	}
+
+
+	public int getCode() {
+		return code;
+	}
+
+
+	public void setCode(int code) {
+		this.code = code;
 	}
 }

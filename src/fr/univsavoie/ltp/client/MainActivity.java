@@ -1043,7 +1043,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 			
 			// Instance de SharedPreferences pour lire les données dans un fichier
 			SharedPreferences myPrefs = this.getSharedPreferences("UserPrefs", MODE_WORLD_READABLE); 
-			login = myPrefs.getString("Email", null);
+			login = myPrefs.getString("Login", null);
 			
 			// Afficher la boite de dialogue au démarrage ?
 			// Si oui, celle anonyme ou utilisateur connecté ?
@@ -1195,7 +1195,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		        anotherOverlayItemArray.add(new OverlayItem(pote.getString("username"), status, new GeoPoint(lat, lon)));
 		        
 		        // Ajouter l'ami dans la friends ListView
-		        listFriends.add(new Friends(pote.getString("username"), status,lon, lat));
+		        listFriends.add(new Friends(pote.getString("username"), status, lon, lat));
 	        }
 	        
 	        // Load & setfriends & notify ListView adapter
