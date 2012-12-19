@@ -759,6 +759,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		updateUIWithItineraryMarkers();
 	}
 	
+	
 	public void updateUIWithItineraryMarkers()
 	{
 		itineraryMarkers.removeAllItems();
