@@ -1,5 +1,5 @@
 <resources>
-
+	<string name="msg_accueil">Salut, Etranger, connecte toi!</string>
     <string name="app_name">LocalizeTeaPot</string>
     <string name="title_activity_main">LocalizeTeaPot</string>
     
@@ -34,7 +34,7 @@
     <string name="about">A propos</string>
     
     <string name="auth_ok">Authentification réussit</string>
-    <string name="auth_fail">Authentication échouée</string>
+    <string name="auth_fail">Authentification échouée</string>
     <string name="prefs_update_error">Erreur lors du changement des préférences</string>
     <string name="signup_ok">Inscription reussit, vous pouvez vous connecter !</string>
     <string name="signup_fail">Erreur d\'inscription: vérifiez vos paramètres réseaux!</string>
@@ -43,13 +43,21 @@
     <string name="departure">Départ</string>
     <string name="destination">Destination</string>
     <string name="viapoints">Via#8230;</string>
- 
+    
+    <string name="toast_wifi">Connexion établit via WI-FI !</string>
+    <string name="toast_3G">Connexion établit via 3G !</string>
+    <string name="toast_aucun_reseau">Aucun réseau disponible: vérifier votre connexion !</string>
+    <string name="toast_address">L\'adresse n\'a pas été trouvée.</string>
+    <string name="toast_friend_statut">Cet amis n\'a pas encore de statut</string>
+    <string name="toast_geocode">Erreur de géolocalisation</string>
+    <string name="toast_route">Nous avons un problème pour trouver le chemin</string>
+    
     <string name="itinerary">Itinéraire</string>
     <string name="poi_list">Points d\'intérêt</string>
     
-    <string name="history_status">Historique de vos status</string>
-    <string name="latest_status">Vos derniers statues publiés</string>
-    <string name="title_publish_status">Publier un status a tes amis</string>
+    <string name="history_status">Historique de vos statuts</string>
+    <string name="latest_status">Vos derniers statuts publiés</string>
+    <string name="title_publish_status">Publier un statut à tes amis</string>
     
     <string name="submit">Envoyer</string>
     <string name="search">Rechercher</string>

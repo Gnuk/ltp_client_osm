@@ -1,5 +1,5 @@
 <resources>
-
+	<string name="msg_accueil">Hello</string>
     <string name="app_name">LocalizeTeaPot</string>
     <string name="title_activity_main">LocalizeTeaPot</string>
     
@@ -26,7 +26,6 @@
     <string name="logout">Logout</string>
     <string name="signup">Signup</string>
     <string name="signin">Signin</string>
-    <string name="publish_status">Publish a status</string>
     <string name="my_account">My account</string>
     <string name="back_to_my_pos">Back to my position</string>
     <string name="user_app_settings">User settings</string>
@@ -44,7 +43,15 @@
     <string name="departure">Departure</string>
     <string name="destination">Destination</string>
     <string name="via_point">Via-Point</string>
- 
+	
+    <string name="toast_wifi">Connection with WI-FI !</string>
+    <string name="toast_3G">Connection with 3G !</string>
+    <string name="toast_aucun_reseau">Network disable !</string>
+    <string name="toast_address">Address not found.</string>
+    <string name="toast_friend_statut">This friend don\'t have status</string>
+    <string name="toast_geocode">Geocoding error</string>
+    <string name="toast_route">We have a problem to get the route</string>
+    
     <string name="itinerary">Itinerary</string>
     <string name="poi_list">POI List</string>
     
@@ -58,5 +65,4 @@
     <string name="bt_signin">Login</string>
     <string name="bt_close">Close</string>
     <string name="title_choose_action">Choose an action</string>
-    
 </resources>

@@ -207,12 +207,12 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		final NetworkInfo wifi = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 		final NetworkInfo mobile = connMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
 		if (wifi.isAvailable() && (wifi.getDetailedState() == DetailedState.CONNECTING || wifi.getDetailedState() == DetailedState.CONNECTED)) {
-			Toast.makeText(this, "Connexion établit via WI-FI !", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, R.string.toast_wifi, Toast.LENGTH_LONG).show();
 			isWifiEnabled = true;
 		} else if (mobile.isAvailable() && (mobile.getDetailedState() == DetailedState.CONNECTING || mobile.getDetailedState() == DetailedState.CONNECTED)) {
-			Toast.makeText(this, "Connexion établit via 3G !", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, R.string.toast_3G, Toast.LENGTH_LONG).show();
 		} else {
-			Toast.makeText(this, "Aucun réseau disponible: vérifier votre connexion !", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, R.string.toast_aucun_reseau, Toast.LENGTH_LONG).show();
 		}
 		
 		// Obtenir le service de localisation
@@ -370,7 +370,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 				}
 				else
 				{
-					Toast.makeText(MainActivity.this, "Cet amis n'a pas encore de statut", Toast.LENGTH_LONG).show();
+					Toast.makeText(MainActivity.this, R.string.toast_friend_statut, Toast.LENGTH_LONG).show();
 				}
 			}
 		});
@@ -655,7 +655,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		try {
 			List<Address> foundAdresses = geocoder.getFromLocationName(destinationAddress, 1);
 			if (foundAdresses.size() == 0) { //if no address found, display an error
-				Toast.makeText(this, "Address not found.", Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, R.string.toast_address, Toast.LENGTH_SHORT).show();
 			} else {
 				Address address = foundAdresses.get(0); //get first address
 				destinationPoint = new GeoPoint(address.getLatitude(), address.getLongitude());
@@ -665,7 +665,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 				map.getController().setCenter(destinationPoint);
 			}
 		} catch (Exception e) {
-			Toast.makeText(this, "Geocoding error", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.toast_geocode, Toast.LENGTH_SHORT).show();
 		}
 	}
 	
@@ -787,7 +787,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		if (road == null)
 			return;
 		if (road.mStatus == Road.STATUS_DEFAULT)
-			Toast.makeText(map.getContext(), "We have a problem to get the route", Toast.LENGTH_SHORT).show();
+			Toast.makeText(map.getContext(), R.string.toast_route, Toast.LENGTH_SHORT).show();
 		roadOverlay = RoadManager.buildRoadOverlay(road, map.getContext());
 		Overlay removedOverlay = mapOverlays.set(1, roadOverlay);
 			//we set the road overlay at the "bottom", just above the MapEventsOverlay,
