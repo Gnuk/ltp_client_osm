@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="2pt"
-        android:text="Salut! Que veux tu faire?"
+        android:text="@string/title_choose_action"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#ffffff"
         android:textSize="5pt" />
@@ -31,7 +31,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.84"
-                android:text="S&apos;inscrire" />
+                android:text="@string/bt_signup" />
         </TableRow>
 
         <TableRow
@@ -44,7 +44,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.84"
-                android:text="Se connecter" />
+                android:text="@string/bt_signin" />
         </TableRow>
 
         <TableRow
@@ -66,5 +66,5 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="10dp"
-        android:text="Fermer" />
+        android:text="@string/bt_close" />
 </LinearLayout>

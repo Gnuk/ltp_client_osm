@@ -18,6 +18,9 @@
     <string name="slogan_signup">Are you new? Joined you here!</string>
     <string name="slogan_signin">Already a member? Connects you!</string>
     
+    <string name="login_error">Login failed !</string>
+    <string name="welcome_msg">Hello anonymous ! Please login or create account via our website :)</string>
+    
     <string name="publish_status">Publish a status</string>
     <string name="disply_user_infos">Display my informations</string>
     <string name="logout">Logout</string>
@@ -29,6 +32,7 @@
     <string name="user_app_settings">User settings</string>
     <string name="refresh_map">Refresh map</string>
     <string name="search_on_map">Search on map</string>
+    <string name="about">About</string>
     
     <string name="auth_ok">Successful authentication</string>
     <string name="auth_fail">Authentication fails</string>
@@ -46,5 +50,13 @@
     
     <string name="history_status">History of your status</string>
     <string name="latest_status">Your latests published statues</string>
+    <string name="title_publish_status">Publish a status to your friends</string>
+    
+    <string name="submit">Submit</string>
+    <string name="search">Search</string>
+    <string name="bt_signup">Signup</string>
+    <string name="bt_signin">Login</string>
+    <string name="bt_close">Close</string>
+    <string name="title_choose_action">Choose an action</string>
     
 </resources>

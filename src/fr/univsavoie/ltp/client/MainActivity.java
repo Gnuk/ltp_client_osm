@@ -1,3 +1,35 @@
+/*
+	Copyright 2012 OpenTeamMap
+	
+	This software is a part of LocalizeTeaPot whose purpose is to Localize your friends.
+	
+	This software is governed by the CeCILL license under French law and
+	abiding by the rules of distribution of free software.  You can  use, 
+	modify and/ or redistribute the software under the terms of the CeCILL
+	license as circulated by CEA, CNRS and INRIA at the following URL
+	"http://www.cecill.info". 
+	
+	As a counterpart to the access to the source code and  rights to copy,
+	modify and redistribute granted by the license, users are provided only
+	with a limited warranty  and the software's author,  the holder of the
+	economic rights,  and the successive licensors  have only  limited
+	liability. 
+	
+	In this respect, the user's attention is drawn to the risks associated
+	with loading,  using,  modifying and/or developing or reproducing the
+	software by the user in light of its specific status of free software,
+	that may mean  that it is complicated to manipulate,  and  that  also
+	therefore means  that it is reserved for developers  and  experienced
+	professionals having in-depth computer knowledge. Users are therefore
+	encouraged to load and test the software's suitability as regards their
+	requirements in conditions enabling the security of their systems and/or 
+	data to be ensured and,  more generally, to use and operate it in the 
+	same conditions as regards security. 
+	
+	The fact that you are presently reading this means that you have had
+	knowledge of the CeCILL license and that you accept its terms.
+ */
+
 package fr.univsavoie.ltp.client;
 
 import java.util.ArrayList;
@@ -149,8 +181,6 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		setSession(new Session(this));
 		setTools(new Tools(this));
         
-        Log.e("Watch", "Activity Start");
-        
         // Afficher la ActionBar
         ActionBar mActionBar = getSupportActionBar();
         mActionBar.setHomeButtonEnabled(true);
@@ -234,7 +264,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		// On recupère quelques paramètres de la session précédents si possible
 		if (savedInstanceState == null) 
 		{
-			mapController.setZoom(13);
+			mapController.setZoom(15);
 			mapController.setCenter(startPoint);
 		} 
 		else 
@@ -350,6 +380,8 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		
         // Initialiser tout ce qui est données utilisateur propres à l'activité
         init();
+        
+        getTools().relocateUser(mapController, map, myLocationOverlay, location);
     }
     
 	protected void onSaveInstanceState (Bundle outState)
@@ -383,7 +415,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		if (login != null) 
 		{
 			SubMenu sub = menu.addSubMenu(0, 10, 4, R.string.my_account);
-			sub.add(0, 11, 5, R.string.disply_user_infos);
+			//sub.add(0, 11, 5, R.string.disply_user_infos);
 			sub.add(0, 12, 6, R.string.logout);
 			sub.getItem().setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
 			
@@ -400,6 +432,9 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 			sub.add(0, 22, 11, R.string.signin);
 			sub.getItem().setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
 		}
+		
+		//menu.add(0, 30, 12, R.string.about).setIcon(R.drawable.ic_2_action_about)
+		//.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
 
 		return true;
 	}
@@ -412,10 +447,6 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		{
 			finish();
 		}
-		
-		Log.d("Watch", "LOGIN: " + login);
-
-		Log.d("Watch", String.valueOf(item.getItemId()));
 
 		switch (item.getItemId()) 
 		{
@@ -986,49 +1017,6 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 			return false;
 		}
 	}
-		
-	/*//------------ Option Menu implementation
-	
-	@Override 
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.option_menu, menu);
-		return true;
-	}
-	
-	@Override 
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		if (mRoad != null && mRoad.mNodes.size()>0)
-			menu.findItem(R.id.menu_itinerary).setEnabled(true);
-		else 
-			menu.findItem(R.id.menu_itinerary).setEnabled(false);
-		if (mPOIs != null && mPOIs.size()>0)
-			menu.findItem(R.id.menu_pois).setEnabled(true);
-		else 
-			menu.findItem(R.id.menu_pois).setEnabled(false);
-		return true;
-	}
-	
-	@Override 
-	public boolean onOptionsItemSelected(MenuItem item) {
-		Intent myIntent;
-		switch (item.getItemId()) {
-		case R.id.menu_itinerary:
-			myIntent = new Intent(this, RouteActivity.class);
-			myIntent.putExtra("ROAD", mRoad);
-			myIntent.putExtra("NODE_ID", roadNodeMarkers.getBubbledItemId());
-			startActivityForResult(myIntent, ROUTE_REQUEST);
-			return true;
-		case R.id.menu_pois:
-			myIntent = new Intent(this, POIActivity.class);
-			myIntent.putParcelableArrayListExtra("POI", mPOIs);
-			myIntent.putExtra("ID", poiMarkers.getBubbledItemId());
-			startActivityForResult(myIntent, POIS_REQUEST);
-			return true;
-		default:
-			return super.onOptionsItemSelected(item);
-		}
-	}*/
 	
 	/**
 	 * Initialiser la logique de l'application
@@ -1038,8 +1026,8 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		try
 		{
 			// On recupère les préférences utilisateurs paramètrer dans l'activité des Paramètres
-			SharedPreferences userPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-			displayUserInfos = userPrefs.getBoolean("checkBoxDisplayUserInfos", false);
+			//SharedPreferences userPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+			//displayUserInfos = userPrefs.getBoolean("checkBoxDisplayUserInfos", false);
 			
 			// Instance de SharedPreferences pour lire les données dans un fichier
 			SharedPreferences myPrefs = this.getSharedPreferences("UserPrefs", MODE_WORLD_READABLE); 
@@ -1050,28 +1038,12 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 			if (login == null)
 			{
 				getPopup().popupGuest();
-			}
-			else
-			{
-				if (displayUserInfos)
-				{
-					getPopup().popupDisplayUserInfos();
-				}
-			}
-		
-			// On met a jours la barre infos de l'utilisateur
-			if (login == null)
-			{
 				getTools().infoBar(this, "Salut, Etranger, connecte toi!", true);
 			}
 			else
 			{
 				getTools().infoBar(this,"Salut, " + login + "! ", true);
-			}
-			
-			// Connecter l'utilisateur et parser ses amis
-			if (login != null)
-			{
+				
 				// Appeler la fonction pour parser les amis et les affichés sur la carte
 				displayFriends();
 			}
@@ -1082,8 +1054,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 	}
 	
     /**
-     * Fonction pour afficher sur la carte les amis en forme
-     * de marqueurs avec a l'interieur son status, ...
+     * Fonction pour afficher sur la carte les amis en forme de marqueurs avec a l'interieur son status, ...
      */
 	public void displayFriends()
     {
@@ -1098,12 +1069,14 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		}
     }
     
+	/**
+	 * On appel cette méthode quand on appuie sur un marquer pour ensuite afficher un toast
+	 */
     OnItemGestureListener<OverlayItem> myOnItemGestureListener = new OnItemGestureListener<OverlayItem>() 
 	{
         public boolean onItemSingleTapUp(int index, OverlayItem item)
         {
-            Toast.makeText(
-                MainActivity.this,
+            Toast.makeText(MainActivity.this,
                 item.mDescription + "\n" + item.mTitle + "\n"
                     + item.mGeoPoint.getLatitudeE6() + " : "
                     + item.mGeoPoint.getLongitudeE6(),
@@ -1121,8 +1094,6 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 	@Override
 	public void onLocationChanged(Location location)
 	{
-		Log.i("GPS", "Location changed");
-		
 		// On recupère les paramètres de l'utilisateur
 		SharedPreferences userPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean useTracker = userPrefs.getBoolean("checkBoxTracker", false);
@@ -1140,6 +1111,9 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 			String json = "{\"ltp\":{\"application\":\"Client LTP\",\"track\":{\"lon\" : \"" + String.valueOf(getLongitude()) + "\",\"lat\" : \"" + String.valueOf(getLatitude()) + "\"}}}";
 			session.putJSON("https://jibiki.univ-savoie.fr/ltpdev/rest.php/api/1/tracker", "TRACKER", json);
 		}
+		
+		// Mettre a jours les status
+		displayFriends();
 	}
 
 	@Override
@@ -1208,6 +1182,13 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
             ItemizedOverlayWithFocus<OverlayItem> anotherItemizedIconOverlay = new ItemizedOverlayWithFocus<OverlayItem>(this, anotherOverlayItemArray, myOnItemGestureListener);
             map.getOverlays().add(anotherItemizedIconOverlay);
             map.refreshDrawableState();
+            
+            //map.getOverlays().add(myLocationOverlay);
+            //map.getOverlays().add(itineraryMarkers);
+            //map.getOverlays().add(roadNodeMarkers);
+            //map.getOverlays().add(poiMarkers);
+            //map.getOverlays().add(overlay);
+            
             //map.postInvalidate();
 			runOnUiThread(new Runnable()
 			{

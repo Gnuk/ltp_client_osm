@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 <PreferenceCategory android:title="Affichage">
-     
-    <CheckBoxPreference
-        android:key="checkBoxDisplayUserInfos"
-        android:summary="Afficher l'écran d'accueil"
-        android:summaryOff="N'affiche pas vos informations à chaque démarrage de l'application"
-        android:summaryOn="Affiche à chaque démarrage de l'application vos dérnières informations."
-        android:title="Afficher l'écran d'accueil" />
     
     <CheckBoxPreference
         android:key="checkBoxTracker"

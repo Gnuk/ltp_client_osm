@@ -18,6 +18,9 @@
     <string name="slogan_signup">Etes-vous nouveau? Inscrivez-vous ici.</string>
     <string name="slogan_signin">Déjà membre? Connectez-vous</string>
     
+    <string name="login_error">Login et/ou mot de passe incorrecte !</string>
+    <string name="welcome_msg">Hello anonymous ! Please login or create account via our website :)</string>
+    
     <string name="publish_status">Publier un status</string>
     <string name="disply_user_infos">Afficher mes informations</string>
     <string name="logout">Se déconnecter</string>
@@ -28,6 +31,7 @@
     <string name="user_app_settings">Préférences utilisateur</string>
     <string name="refresh_map">Actualiser la carte</string>
     <string name="search_on_map">Rechercher sur la carte</string>
+    <string name="about">A propos</string>
     
     <string name="auth_ok">Authentification réussit</string>
     <string name="auth_fail">Authentication échouée</string>
@@ -43,4 +47,14 @@
     <string name="itinerary">Itinéraire</string>
     <string name="poi_list">Points d\'intérêt</string>
     
+    <string name="history_status">Historique de vos status</string>
+    <string name="latest_status">Vos derniers statues publiés</string>
+    <string name="title_publish_status">Publier un status a tes amis</string>
+    
+    <string name="submit">Envoyer</string>
+    <string name="search">Rechercher</string>
+    <string name="bt_signup">S\'inscrire</string>
+    <string name="bt_signin">Se connecter</string>
+    <string name="bt_close">Fermer</string>
+    <string name="title_choose_action">Bienvenue, que voulez-vous faire ?</string>
 </resources>

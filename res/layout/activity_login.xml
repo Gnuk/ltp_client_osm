@@ -2,12 +2,12 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:background="#E9E7FE"
     android:fillViewport="true" >
 
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:background="#ffffff" >
+        android:layout_height="wrap_content" >
 
         <!-- Header  Starts -->
         <!-- Header Ends -->
@@ -32,7 +32,7 @@
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/email"
+                android:text="@string/login"
                 android:textColor="#372c24" />
 
             <EditText
@@ -68,17 +68,6 @@
                 android:layout_marginTop="10dip"
                 android:text="@string/submit_login" />
             <!-- Link to Registration Screen -->
-
-          <TextView
-              android:id="@+id/link_to_register"
-              android:layout_width="fill_parent"
-              android:layout_height="wrap_content"
-              android:layout_marginBottom="40dip"
-              android:layout_marginTop="40dip"
-              android:gravity="center"
-              android:text="@string/slogan_signup"
-              android:textColor="#0b84aa"
-              android:textSize="20dip" />
 
         </LinearLayout>
         <!-- Login Form Ends -->
