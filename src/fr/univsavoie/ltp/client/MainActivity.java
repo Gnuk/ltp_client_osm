@@ -1068,6 +1068,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 			// Si oui, celle anonyme ou utilisateur connecté ?
 			if (login == null)
 			{
+				
 				getPopup().popupGuest();
 				getTools().infoBar(this, this.getString(R.string.msg_accueil), true);
 			}
