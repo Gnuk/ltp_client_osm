@@ -4,7 +4,7 @@
 
 ### Prérequis
 
-- un eclipse configuré avec le greffon egit et le SDK Android de google.
+- un eclipse configuré avec le greffon egit et TOUT les SDKs Android de google.
 
 ### Lien du projet
 
