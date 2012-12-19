@@ -518,22 +518,22 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		case R.id.menuPersan:
 			// Comportement du bouton "langue PERSAN "		
 			parsi();
-			Intent m = new Intent(MainActivity.this, MainActivity.class);    
-    		startActivityForResult(m, 2);
+			finish();
+			startActivity(getIntent());
 			return true;
 		
 		case R.id.menuEnglais:
 			// Comportement du bouton "langue PERSAN "		
 			english();
-			Intent e = new Intent(MainActivity.this, MainActivity.class);    
-    		startActivityForResult(e, 2);
+			finish();
+			startActivity(getIntent());
 			return true;
 			
 		case R.id.menuFrance:
 			// Comportement du bouton "langue PERSAN "		
 			french();
-			Intent f = new Intent(MainActivity.this, MainActivity.class);    
-    		startActivityForResult(f, 2);
+			finish();
+			startActivity(getIntent());
 			return true;
 		default:
 			break;
@@ -1075,7 +1075,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 			}
 			else
 			{
-				getTools().infoBar(this,"Salut, " + login + "! ", true);
+				getTools().infoBar(this, this.getString(R.string.msg_salut) + " " + login, true);
 				
 				// Appeler la fonction pour parser les amis et les affichés sur la carte
 				displayFriends();
