@@ -20,6 +20,8 @@
 - choisir le chemin de la bibliothéque dans le champ "Root Directory", la bibliothéque se trouve dans le dossier "libs/ActionBarSherlock" du projet
 - le projet est maintenant importé
 
+- Ajouter une target Android : Clic droit sur le nom du projet puis clic sur Android puis ajouter une target Android 4.2.
+
 ### Erreurs éventuelles
 
 Mauvaise importation de la bibliothèque "ActionBarSherlock". Afin de résoudre cette erreur, il faut aller dans les configurations du projet.
