@@ -1073,7 +1073,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 			}
 			else
 			{
-				getTools().infoBar(this, this.getString(R.string.msg_salut)+login, true);
+				getTools().infoBar(this, this.getString(R.string.msg_salut) + " " + login, true);
 				
 				// Appeler la fonction pour parser les amis et les affichés sur la carte
 				displayFriends();
