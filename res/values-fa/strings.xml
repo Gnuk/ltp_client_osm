@@ -1,0 +1,116 @@
+
+   <resources>
+    <string name="signup_title">ثبت نام</string>  
+    <string name="title_choose_action">گزینه مناسب را برگزینید</string>
+    <string name="y">ایگرگ</string>
+    <string name="x">ایکس</string>
+    <string name="lat">پهنا</string>
+    <string name="lon">درازا</string>
+    <string name="coordonnes">آدرس</string>
+ 	<string name="VosInformations">دادههای شما</string>
+    <string name="hello_world">سلام به همگی</string>
+    <string name="activity_main">پیدا کردن دوستان</string>
+    <string name="menuExit">بستن</string>
+    <string name="bt_close">بستن</string>
+    <string name="_textViewUserStatus">ایراد  در ارتباط</string>
+    <string name="btnLogin">نام کاربری</string>
+    <string name="texPassword">رمز</string>
+    <string name="texEmail">ایمیل</string>
+    <string name="textViewConnexion">ارتباط</string>
+	<string name="votreLangue">زبان شما</string>
+	<string name="voulezfaire">انتخاب</string>
+	<string name="inscrir">ثبت نام</string>
+	<string name="secoonecter">متصل شدن</string>
+	<string name="fermer">بستن</string>
+	<string name="msg_accueil">سلام نا آشنا: وارد  شو</string>
+	<string name="salut">      :درود    </string>
+	<string name="nolocfoun">نا مشخص</string>
+	<string name="yourcurrentpos">مکان کنونی شما</string>
+	<string name="app_name">پیدا کردن دوستان</string>
+    <string name="title_activity_main">پیدا کردن دوستان</string>
+    
+    <string name="quit">بیرون آمدن</string>
+    <string name="settings">تنظیمات</string>
+    <string name="cancel">لغو کردن</string>
+    
+    <string name="bt_signup">ثبت نام</string>
+    <string name="bt_signin">ورود</string>
+    <string name="login">نام کاربری</string>
+    <string name="password">رمز</string>
+    <string name="password_check">رمز را چک کنید</string>
+    <string name="email">آدرس الکترونیکی</string>
+    <string name="submit_signup">ایجاد  کاربری  جدید</string>
+    <string name="submit_login">ورود</string>
+    <string name="slogan_signup">شما جدید هستید ثبت نام کنید</string>
+    <string name="slogan_signin">ورود</string>
+    
+    <string name="publish_status">ارسال  یک  وضعیت</string>
+    <string name="disply_user_infos">نمایش تغییرات</string>
+    <string name="logout">بیرون آمدن</string>
+    <string name="signup">ثبت نام</string>
+    <string name="signin">ورود</string>
+    <string name="my_account">حساب کاربری</string>
+    <string name="back_to_my_pos">برگشت به محل اول</string>
+    <string name="user_app_settings">تنظیمات کاربر</string>
+    <string name="refresh_map">بارگزاری  دوباره  نقشه</string>
+    <string name="search_on_map">جستجو در نقشه</string>
+    
+    <string name="auth_ok">ورود به درستی صورت گرفت</string>
+    <string name="auth_fail">ایراد در ارتباط</string>
+    <string name="prefs_update_error">ایراد در هنگام تغییر تنظیمات</string>
+    <string name="signup_ok">اکنون میتوانید وارد برنامه شوید</string>
+    <string name="signup_fail">لیراد در ثبت نام شبکه را تست کنید</string>
+    
+    <string name="menu_settings">پارامتر</string>
+    <string name="departure">مبدا حرکت</string>
+    <string name="destination">مقصد</string>
+    <string name="via_points">از طریق</string>
+ 
+    <string name="itinerary">مسیریابی</string>
+    <string name="poi_list">نقاط  مورد  علاقه</string>
+    
+    
+    <string name="langue">زبان</string>
+    <string name="france">فرانسوی</string>
+    <string name="persan">پارسی</string>
+    <string name="english">انگلیسی</string>    
+    <string name="YourLocationis">شما اینجا هستید </string>
+    <string name="longg">درازا</string>
+    <string name="Yourcurrent">مکان شما پیدا نشد</string>
+    <string name=" Teslocalis">مکان شما</string>
+    <string name="nomdutilisateur">نام  کاربر وارد کنید</string>
+    <string name="votrenom">نام کاربری باید 3 حرف داشته باشد</string>
+    <string name="unmot">رمز وارد کنید</string>
+    <string name="votremot">رمز شما باید 6حرف داشتع باشد</string>
+    <string name="vefrication">چک کردن رمز عبور  مورد نیاز است</string>
+    <string name="nonvefrication">تمز عبور یکسان نیست</string>
+    <string name="impossible">غیر ممکن است که وضعیت شما نشان داده شود</string>
+    <string name="statusmi">بروز رسانی وضعیت ها</string>
+    <string name="search">جستجو</string>
+    <string name="title">عنوان</string>
+    <string name="instructions">شرح</string>
+    <string name="address">آدرس</string>
+    <string name="description">دستورالعمل</string>
+    <string name="distanceduration">فاصله / مدت</string>
+    <string name="Itinerary">ِِِِجابجایی</string>
+    <string name="info">ِِِِآخرین اطلاعات</string>
+   	<string name="recherchesurlacarte">ِِِِجستجو بر روی نقشه</string>
+   	<string name="pointi">ِِِِنقطه مورد علاقه</string>
+	<string name="balisMes">&lt;پیام></string>
+	<string name="yourloca">شما اینجا هستید</string>
+	<string name="publier">نمایش جایگاه</string>
+	<string name="statuss">نمایش تغییرات برای دوستان</string>
+	
+	<string name="aff">نمایش</string>
+	<string name="aff_position">جایگاه من بفرستد</string>
+	<string name="aff_envoie_serveur_not">Don\'t send my position to the server</string>
+	<string name="aff_envoie_serveur">Send my position to the server</string>
+	
+	<string name="affichage">نمایش</string>    
+    <string name="afficherlaminimap">قشه  ننمایش</string>
+    <string name="noafficherlaminimap">غیر فعال کردن نقشه کوچک</string>
+    <string name="afficheruneminicartepourplusdeprcision">برای دقت بالا نقشه کوچک را نمایش دهد</string>
+    <string name="affichercranaccueil">نمایش خانه</string>
+    <string name="nplafficher">اطلاعات را با هر بار وارد شدن نمایش ندهد</string>
+    <string name="afficherchaquemarragepplicatioinformations">اطلاعات را با هر بار وارد شدن نمایش  دهد</string>   
+</resources>
