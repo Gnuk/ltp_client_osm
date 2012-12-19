@@ -1365,6 +1365,9 @@ containing a value of this type.
         public static final int auth_fail=0x7f0b002c;
         public static final int auth_ok=0x7f0b002b;
         public static final int back_to_my_pos=0x7f0b0026;
+        public static final int bt_close=0x7f0b003d;
+        public static final int bt_signin=0x7f0b003c;
+        public static final int bt_signup=0x7f0b003b;
         public static final int cancel=0x7f0b0013;
         public static final int departure=0x7f0b0031;
         public static final int destination=0x7f0b0032;
@@ -1400,10 +1403,11 @@ containing a value of this type.
         public static final int submit_login=0x7f0b001b;
         public static final int submit_signup=0x7f0b001a;
         public static final int title_activity_main=0x7f0b0010;
+        public static final int title_choose_action=0x7f0b003e;
         public static final int title_publish_status=0x7f0b0038;
         public static final int user_app_settings=0x7f0b0027;
         public static final int via_point=0x7f0b0033;
-        public static final int viapoints=0x7f0b003b;
+        public static final int viapoints=0x7f0b003f;
         public static final int welcome_msg=0x7f0b001f;
     }
     public static final class style {

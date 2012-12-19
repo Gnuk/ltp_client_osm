@@ -127,6 +127,9 @@ public class Tools
     	pMapController.setCenter(new GeoPoint(pLocation.getLatitude(), pLocation.getLongitude()));   	
     	pLocationOverlay.setLocation(new GeoPoint(pLocation.getLatitude(), pLocation.getLongitude()));
     	pMapView.invalidate();
+    	
+    	// Actualiser l'affichage des amis
+    	mainActivity.displayFriends();
     }
     
 	/**

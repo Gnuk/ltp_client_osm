@@ -53,7 +53,10 @@
     <string name="title_publish_status">Publish a status to your friends</string>
     
     <string name="submit">Submit</string>
-    
     <string name="search">Search</string>
+    <string name="bt_signup">Signup</string>
+    <string name="bt_signin">Login</string>
+    <string name="bt_close">Close</string>
+    <string name="title_choose_action">Choose an action</string>
     
 </resources>

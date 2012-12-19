@@ -52,6 +52,9 @@
     <string name="title_publish_status">Publier un status a tes amis</string>
     
     <string name="submit">Envoyer</string>
-    
-     <string name="search">Rechercher</string>
+    <string name="search">Rechercher</string>
+    <string name="bt_signup">S\'inscrire</string>
+    <string name="bt_signin">Se connecter</string>
+    <string name="bt_close">Fermer</string>
+    <string name="title_choose_action">Bienvenue, que voulez-vous faire ?</string>
 </resources>

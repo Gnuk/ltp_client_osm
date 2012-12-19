@@ -1017,49 +1017,6 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 			return false;
 		}
 	}
-		
-	/*//------------ Option Menu implementation
-	
-	@Override 
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.option_menu, menu);
-		return true;
-	}
-	
-	@Override 
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		if (mRoad != null && mRoad.mNodes.size()>0)
-			menu.findItem(R.id.menu_itinerary).setEnabled(true);
-		else 
-			menu.findItem(R.id.menu_itinerary).setEnabled(false);
-		if (mPOIs != null && mPOIs.size()>0)
-			menu.findItem(R.id.menu_pois).setEnabled(true);
-		else 
-			menu.findItem(R.id.menu_pois).setEnabled(false);
-		return true;
-	}
-	
-	@Override 
-	public boolean onOptionsItemSelected(MenuItem item) {
-		Intent myIntent;
-		switch (item.getItemId()) {
-		case R.id.menu_itinerary:
-			myIntent = new Intent(this, RouteActivity.class);
-			myIntent.putExtra("ROAD", mRoad);
-			myIntent.putExtra("NODE_ID", roadNodeMarkers.getBubbledItemId());
-			startActivityForResult(myIntent, ROUTE_REQUEST);
-			return true;
-		case R.id.menu_pois:
-			myIntent = new Intent(this, POIActivity.class);
-			myIntent.putParcelableArrayListExtra("POI", mPOIs);
-			myIntent.putExtra("ID", poiMarkers.getBubbledItemId());
-			startActivityForResult(myIntent, POIS_REQUEST);
-			return true;
-		default:
-			return super.onOptionsItemSelected(item);
-		}
-	}*/
 	
 	/**
 	 * Initialiser la logique de l'application
@@ -1069,8 +1026,8 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		try
 		{
 			// On recupère les préférences utilisateurs paramètrer dans l'activité des Paramètres
-			SharedPreferences userPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-			displayUserInfos = userPrefs.getBoolean("checkBoxDisplayUserInfos", false);
+			//SharedPreferences userPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+			//displayUserInfos = userPrefs.getBoolean("checkBoxDisplayUserInfos", false);
 			
 			// Instance de SharedPreferences pour lire les données dans un fichier
 			SharedPreferences myPrefs = this.getSharedPreferences("UserPrefs", MODE_WORLD_READABLE); 
@@ -1154,6 +1111,9 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 			String json = "{\"ltp\":{\"application\":\"Client LTP\",\"track\":{\"lon\" : \"" + String.valueOf(getLongitude()) + "\",\"lat\" : \"" + String.valueOf(getLatitude()) + "\"}}}";
 			session.putJSON("https://jibiki.univ-savoie.fr/ltpdev/rest.php/api/1/tracker", "TRACKER", json);
 		}
+		
+		// Mettre a jours les status
+		displayFriends();
 	}
 
 	@Override
@@ -1222,6 +1182,13 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
             ItemizedOverlayWithFocus<OverlayItem> anotherItemizedIconOverlay = new ItemizedOverlayWithFocus<OverlayItem>(this, anotherOverlayItemArray, myOnItemGestureListener);
             map.getOverlays().add(anotherItemizedIconOverlay);
             map.refreshDrawableState();
+            
+            //map.getOverlays().add(myLocationOverlay);
+            //map.getOverlays().add(itineraryMarkers);
+            //map.getOverlays().add(roadNodeMarkers);
+            //map.getOverlays().add(poiMarkers);
+            //map.getOverlays().add(overlay);
+            
             //map.postInvalidate();
 			runOnUiThread(new Runnable()
 			{

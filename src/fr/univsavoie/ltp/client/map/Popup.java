@@ -202,20 +202,14 @@ public class Popup
 				}
 				else
 				{
-					//List<NameValuePair> status = new ArrayList<NameValuePair>(2);
-					//status.add(new BasicNameValuePair("lon", String.valueOf(activity.getLongitude())));
-					//status.add(new BasicNameValuePair("lat", String.valueOf(activity.getLatitude())));
-					//status.add(new BasicNameValuePair("content", userStatus.getText().toString()));
-				   
-					
-					
 					String json = "{\"ltp\":{\"application\":\"Client LTP\",\"status\":{\"lon\" : \"" + String.valueOf(activity.getLongitude()) + "\",\"lat\" : \"" + String.valueOf(activity.getLatitude()) + "\",\"content\" : \"" + userStatus.getText().toString() + "\"}}}";
 					activity.getSession().postJSON("https://jibiki.univ-savoie.fr/ltpdev/rest.php/api/1/statuses", "STATUSES", json);
 					
-					//activity.getSession().sendJson("https://jibiki.univ-savoie.fr/ltpdev/rest.php/api/1/statuses", status);
-					
 					Toast.makeText(activity, "Status mise a jours !", Toast.LENGTH_LONG).show();
 					popupPublishStatus.dismiss();
+					
+					// Actualise les marqueurs
+					activity.displayFriends();
 				}
 			}
 		});
