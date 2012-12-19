@@ -20,9 +20,9 @@
 - choisir le chemin de la bibliothéque dans le champ "Root Directory", la bibliothéque se trouve dans le dossier "libs/ActionBarSherlock" du projet
 - le projet est maintenant importé
 
-### Erreur éventuel
+### Erreurs éventuelles
 
-Mauvaise importation de la bibliothéque "ActionBarSherlock". Afin de résoudre cette erreur, il faut aller dans les configurations du projet.
+Mauvaise importation de la bibliothèque "ActionBarSherlock". Afin de résoudre cette erreur, il faut aller dans les configurations du projet.
 
 - sélectionner le projet et faire un clique-droit dessus, puis choisir le menu "Properties"
 - aller dans l'onglet "Android" et vérifier que "Is Library" est décoché
