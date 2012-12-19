@@ -149,6 +149,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 	private AutoCompleteTextView poiTagText;
 	protected static final int POIS_REQUEST = 4;
 	private ArrayList<OverlayItem> anotherOverlayItemArray;
+	private MapEventsOverlay overlay;
 	
 	/* Variables de traitements */
 	private boolean displayUserInfos;
@@ -198,7 +199,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		mapController = map.getController();
         
 		//To use MapEventsReceiver methods, we add a MapEventsOverlay:
-		MapEventsOverlay overlay = new MapEventsOverlay(this, this);
+		overlay = new MapEventsOverlay(this, this);
 		map.getOverlays().add(overlay);
 		
 		boolean isWifiEnabled = false;
@@ -523,14 +524,14 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		
 		case R.id.menuEnglais:
 			// Comportement du bouton "langue PERSAN "		
-			englais();
+			english();
 			Intent e = new Intent(MainActivity.this, MainActivity.class);    
     		startActivityForResult(e, 2);
 			return true;
 			
 		case R.id.menuFrance:
 			// Comportement du bouton "langue PERSAN "		
-			fransais();
+			french();
 			Intent f = new Intent(MainActivity.this, MainActivity.class);    
     		startActivityForResult(f, 2);
 			return true;
@@ -1195,7 +1196,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 	        		status = pote.getString("content");
 	        	}
 	        	
-		        // Préparé l'array des icônes amis sur la carte
+		        // Préparer l'array des icônes amis sur la carte
 		        anotherOverlayItemArray.add(new OverlayItem(pote.getString("username"), status, new GeoPoint(lat, lon)));
 		        
 		        // Ajouter l'ami dans la friends ListView
@@ -1210,15 +1211,21 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
             // Créer un nouveau ItemizedOverlayWithFocus avec notre array d'amis
 	        // Ensuite, on redessine la carte pour actualiser les marqueurs
             ItemizedOverlayWithFocus<OverlayItem> anotherItemizedIconOverlay = new ItemizedOverlayWithFocus<OverlayItem>(this, anotherOverlayItemArray, myOnItemGestureListener);
+            
+            map.getOverlays().clear();
+            
             map.getOverlays().add(anotherItemizedIconOverlay);
+            
+            map.getOverlays().add(myLocationOverlay);
+            map.getOverlays().add(itineraryMarkers);
+            map.getOverlays().add(roadNodeMarkers);
+            map.getOverlays().add(poiMarkers);
+            map.getOverlays().add(overlay);
+            
+            startPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
+            
             map.refreshDrawableState();
-            
-            //map.getOverlays().add(myLocationOverlay);
-            //map.getOverlays().add(itineraryMarkers);
-            //map.getOverlays().add(roadNodeMarkers);
-            //map.getOverlays().add(poiMarkers);
-            //map.getOverlays().add(overlay);
-            
+
             //map.postInvalidate();
 			runOnUiThread(new Runnable()
 			{
@@ -1229,7 +1236,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 			
             // Paramètres pour l'overlay des icônes
             anotherItemizedIconOverlay.setFocusItemsOnTap(true);
-            anotherItemizedIconOverlay.setFocusedItem(0);  
+            anotherItemizedIconOverlay.setFocusedItem(0);      
 		}
         catch (JSONException e) 
         {
@@ -1242,9 +1249,11 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
     }
 	
 	/*
-	 *  Persan langue
-	 * */
-	public void parsi(){
+	 * Méthodes pour les langues de l'application
+	 */
+	
+	public void parsi()
+	{
 		String languageToLoad  = "fa";
 	    Locale locale = new Locale(languageToLoad); 
 	    Locale.setDefault(locale);
@@ -1252,15 +1261,10 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 	    config.locale = locale;	    
 	    getBaseContext().getResources().updateConfiguration(config,getBaseContext().getResources().getDisplayMetrics());
 	    Resources standardResources = getBaseContext().getResources();
-	    
-
-	    /*   AssetManager assets = standardResources.getAssets();
-	    DisplayMetrics metrics = standardResources.getDisplayMetrics();	    
-	    Resources defaultResources = new Resources(assets, metrics, config);*/
-	 //   displayGuestPopup();
 	}
-	private void englais() {
-		// TODO Auto-generated method stub
+	
+	private void english() 
+	{
 		String languageToLoad  = "en";
 	    Locale locale = new Locale(languageToLoad); 
 	    Locale.setDefault(locale);
@@ -1268,14 +1272,10 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 	    config.locale = locale;	    
 	    getBaseContext().getResources().updateConfiguration(config,getBaseContext().getResources().getDisplayMetrics());
 	    Resources standardResources = getBaseContext().getResources();
-	    
-
-	    /*   AssetManager assets = standardResources.getAssets();
-	    DisplayMetrics metrics = standardResources.getDisplayMetrics();	    
-	    Resources defaultResources = new Resources(assets, metrics, config);*/
-	 //   displayGuestPopup();
 	}
-	private void fransais() {
+	
+	private void french() 
+	{
 		// TODO Auto-generated method stub
 		String languageToLoad  = "fr";
 	    Locale locale = new Locale(languageToLoad); 
@@ -1284,13 +1284,12 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 	    config.locale = locale;	    
 	    getBaseContext().getResources().updateConfiguration(config,getBaseContext().getResources().getDisplayMetrics());
 	    Resources standardResources = getBaseContext().getResources();
-	    
-
-	    /*   AssetManager assets = standardResources.getAssets();
-	    DisplayMetrics metrics = standardResources.getDisplayMetrics();	    
-	    Resources defaultResources = new Resources(assets, metrics, config);*/
-	 //   displayGuestPopup();
 	}
+	
+	
+	/*
+	 * Getteurs & Setteurs
+	 */
 	
 	public Popup getPopup() 
 	{
