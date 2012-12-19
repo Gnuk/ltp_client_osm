@@ -1,4 +1,5 @@
 <resources>
+    <string name="msg_salut">Salut </string> 
 	<string name="msg_accueil">Salut, Etranger, connecte toi!</string>
     <string name="app_name">LocalizeTeaPot</string>
     <string name="title_activity_main">LocalizeTeaPot</string>
