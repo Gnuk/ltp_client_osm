@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
-<PreferenceCategory android:title="Affichage">
+<PreferenceCategory android:title="@string/aff">
     
     <CheckBoxPreference
         android:key="checkBoxTracker"
-        android:summary="Envoyer ma position"
-        android:summaryOff="N'envoie pas au serveur vos coordonnées à chaque modification de votre position"
-        android:summaryOn="Envoie au serveur vos coordonnées à chaque modification de votre position."
-        android:title="Envoyer ma position" />    
+        android:summary="@string/aff_position"
+        android:summaryOff="@string/aff_envoie_serveur_not"
+        android:summaryOn="@string/aff_envoie_serveur"
+        android:title="@string/aff_position" />    
     </PreferenceCategory>
 
 </PreferenceScreen>

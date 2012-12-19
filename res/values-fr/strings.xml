@@ -42,7 +42,7 @@
     <string name="menu_settings">Paramètres</string>
     <string name="departure">Départ</string>
     <string name="destination">Destination</string>
-    <string name="viapoints">Via#8230;</string>
+    <string name="via_points">Via#8230;</string>
     
     <string name="toast_wifi">Connexion établit via WI-FI !</string>
     <string name="toast_3G">Connexion établit via 3G !</string>
@@ -65,4 +65,67 @@
     <string name="bt_signin">Se connecter</string>
     <string name="bt_close">Fermer</string>
     <string name="title_choose_action">Bienvenue, que voulez-vous faire ?</string>
+    
+    <string name="langue">Langue</string>
+    <string name="france">Français</string>
+    <string name="persan">Persan</string>
+    <string name="english">Anglais</string> 
+    <string name="Quevoulezvousfaire">Que voulez vous faire ?</string>
+    <string name="Sedeonnecter">Se déconnecter</string>
+    <string name="y">y</string>
+    <string name="x">x</string>
+    <string name="lat">Lat:</string>
+    <string name="lon">long</string>
+    <string name="coordonnes">coordonnées</string>
+ 	<string name="VosInformations">Vos informations</string>
+    <string name="activity_main">LocalizeTeaPot</string>
+    <string name="menuExit">Exit</string>
+    <string name="close">Quiter</string>
+    <string name="btnLogin">Mot de passe</string>
+    <string name="texPassword">Mot de passe</string>
+    <string name="texEmail">ٍEmail</string>
+	<string name="voulezfaire">voulez faire</string>
+	<string name="secoonecter">se connecter</string>
+	<string name="fermer">Fermer</string>
+	<string name="salut">"Salut, "</string>	
+    <string name="YourLocationis">Votre position est </string>
+    <string name="txtUStat">Salut, Etranger, connecte toi!</string>
+    <string name="longg">, Long:</string>
+    <string name="Yourcurrent">Ta position actuel n\'a ete pas  trouvé !</string>
+    <string name=" Teslocalis">Tes localis: </string>
+    <string name="votrenom">Votre nom dutilisateur doit etre au minimum de 3 caractères !</string>
+    <string name="nomdutilisateur">Le nom dutilisateur est requis !</string>
+    <string name="votremot">Votre mot de passe doit faire au minimum 6 caractères !</string>
+    <string name="unmot">Un mot de passe est requis</string>
+	<string name="vefrication">La véfrication de votre mot de passe est requis !</string>
+	<string name="nonvefrication">Le mot de passe de vérification nest pas identique !</string>
+	<string name="impossible">Impossible de publié ton status !</string>
+	<string name="statusmi">Status mise a jours</string>
+	<string name="search">Chercher</string>
+	<string name="title">Title</string>
+	<string name="address">Adress</string>
+	<string name="description">Description</string>
+	<string name="instructions">Instructions</string>
+	<string name="distanceduration">Distance/Duration</string>
+	<string name="Itinerary">Itinerary</string>
+	<string name="info">Tes dernières informations</string>
+	<string name="recherchesurlacarte">Recherche sur la carte</string>
+	<string name="pointi">Point d\'interet</string>
+	<string name="balisMes">&lt;Message></string>
+	<string name="yourloca">Votre Location est - </string>
+	<string name="publier">Publier tes status</string>
+	<string name="statuss">Publier mes status pour mes amies</string>
+	
+	<string name="aff">Affichage</string>
+	<string name="aff_position">Envoyer ma position</string>
+	<string name="aff_envoie_serveur_not">N\'envoie pas au serveur vos coordonnées à chaque modification de votre position</string>
+	<string name="aff_envoie_serveur">Envoie au serveur vos coordonnées à chaque modification de votre position</string>
+	
+	<string name="affichage">Affichage</string>    
+    <string name="afficherlaminimap">Afficher la mini map</string>
+    <string name="noafficherlaminimap">Désactiver la mini carte (recommandé si petit écran ou mobile peu performant)."</string>       
+    <string name="afficheruneminicartepourplusdeprcision">Afficher une mini carte pour plus de précision.</string>
+    <string name="affichercranaccueil">Afficher l\'écran d\'accueil</string>
+    <string name="nplafficher">Ne plus afficher vos informations a chaque démarrage de l\'application</string>
+    <string name="afficherchaquemarragepplicatioinformations">Afficher a chaque démarrage de l\'application vos dérnières informations.</string>
 </resources>

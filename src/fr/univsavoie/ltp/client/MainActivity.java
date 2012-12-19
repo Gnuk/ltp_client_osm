@@ -34,6 +34,7 @@ package fr.univsavoie.ltp.client;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -86,6 +87,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -234,7 +236,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		// Afficher une boite de dialogue et proposer d'activer un ou plusieurs services pas actifs
 		if(!isWifiEnabled || !isGPSEnabled)
 		{
-			getTools().showSettingsAlert(this, isWifiEnabled, isGPSEnabled);
+			//getTools().showSettingsAlert(this, isWifiEnabled, isGPSEnabled);
 		}
 		
 		// Si on a une localisation, on définit ses coordonnées geopoint
@@ -411,6 +413,13 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		menu.add(0, 4, 3, R.string.search_on_map).setIcon(R.drawable.ic_2_action_search)
 		.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
 		
+		//Ajouter langue
+		SubMenu subLangue = menu.addSubMenu(0, R.id.menuLangue, 3, R.string.langue);
+		subLangue.add(0, R.id.menuEnglais, 6, R.string.english);
+		subLangue.add(0, R.id.menuFrance,  7, R.string.france);
+		subLangue.add(0, R.id.menuPersan,  8, R.string.persan);
+		subLangue.getItem().setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+		
 		// Afficher le menu selon si utilisateur connecté ou pas
 		if (login != null) 
 		{
@@ -503,7 +512,28 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 		case 12:
 			getSession().logout();
 			break;
-
+		
+			// Ajouter menu langue	
+		case R.id.menuPersan:
+			// Comportement du bouton "langue PERSAN "		
+			parsi();
+			Intent m = new Intent(MainActivity.this, MainActivity.class);    
+    		startActivityForResult(m, 2);
+			return true;
+		
+		case R.id.menuEnglais:
+			// Comportement du bouton "langue PERSAN "		
+			englais();
+			Intent e = new Intent(MainActivity.this, MainActivity.class);    
+    		startActivityForResult(e, 2);
+			return true;
+			
+		case R.id.menuFrance:
+			// Comportement du bouton "langue PERSAN "		
+			fransais();
+			Intent f = new Intent(MainActivity.this, MainActivity.class);    
+    		startActivityForResult(f, 2);
+			return true;
 		default:
 			break;
 		}
@@ -1038,7 +1068,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 			if (login == null)
 			{
 				getPopup().popupGuest();
-				getTools().infoBar(this, "Salut, Etranger, connecte toi!", true);
+				getTools().infoBar(this, this.getString(R.string.msg_accueil), true);
 			}
 			else
 			{
@@ -1210,7 +1240,58 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 			Log.e("Catch", "> parseFriends() - Exception: " + e.getMessage());
 		}
     }
+	
+	/*
+	 *  Persan langue
+	 * */
+	public void parsi(){
+		String languageToLoad  = "fa";
+	    Locale locale = new Locale(languageToLoad); 
+	    Locale.setDefault(locale);
+	    Configuration config = new Configuration();
+	    config.locale = locale;	    
+	    getBaseContext().getResources().updateConfiguration(config,getBaseContext().getResources().getDisplayMetrics());
+	    Resources standardResources = getBaseContext().getResources();
+	    
 
+	    /*   AssetManager assets = standardResources.getAssets();
+	    DisplayMetrics metrics = standardResources.getDisplayMetrics();	    
+	    Resources defaultResources = new Resources(assets, metrics, config);*/
+	 //   displayGuestPopup();
+	}
+	private void englais() {
+		// TODO Auto-generated method stub
+		String languageToLoad  = "en";
+	    Locale locale = new Locale(languageToLoad); 
+	    Locale.setDefault(locale);
+	    Configuration config = new Configuration();
+	    config.locale = locale;	    
+	    getBaseContext().getResources().updateConfiguration(config,getBaseContext().getResources().getDisplayMetrics());
+	    Resources standardResources = getBaseContext().getResources();
+	    
+
+	    /*   AssetManager assets = standardResources.getAssets();
+	    DisplayMetrics metrics = standardResources.getDisplayMetrics();	    
+	    Resources defaultResources = new Resources(assets, metrics, config);*/
+	 //   displayGuestPopup();
+	}
+	private void fransais() {
+		// TODO Auto-generated method stub
+		String languageToLoad  = "fr";
+	    Locale locale = new Locale(languageToLoad); 
+	    Locale.setDefault(locale);
+	    Configuration config = new Configuration();
+	    config.locale = locale;	    
+	    getBaseContext().getResources().updateConfiguration(config,getBaseContext().getResources().getDisplayMetrics());
+	    Resources standardResources = getBaseContext().getResources();
+	    
+
+	    /*   AssetManager assets = standardResources.getAssets();
+	    DisplayMetrics metrics = standardResources.getDisplayMetrics();	    
+	    Resources defaultResources = new Resources(assets, metrics, config);*/
+	 //   displayGuestPopup();
+	}
+	
 	public Popup getPopup() 
 	{
 		return popup;

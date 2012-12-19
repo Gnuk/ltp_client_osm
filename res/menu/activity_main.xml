@@ -7,4 +7,18 @@
         android:id="@+id/menuExit"
         android:icon="@android:drawable/ic_menu_close_clear_cancel"
         android:title="@+string/quit"/>
+    <item
+        android:id="@+id/menuLangue"
+        android:title="@string/langue"
+        android:icon="@android:drawable/ic_menu_manage">
+         <menu>
+             <item android:id="@+id/menuFrance"
+                 android:title="@string/france"/>
+             
+             <item android:id="@+id/menuPersan"
+                  android:title="@string/persan"
+                  />
+             <item android:id="@+id/menuEnglais" android:title="@string/english"/>             
+         </menu>
+     </item>
 </menu>

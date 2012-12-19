@@ -89,7 +89,7 @@
 		            android:layout_height="wrap_content"
 		            android:layout_weight="1"
 		            android:completionThreshold="1"
-		            android:hint="Point d'interet"
+		            android:hint="@string/poi_list"
 		            android:windowSoftInputMode="stateHidden" />
 
 		        <Button

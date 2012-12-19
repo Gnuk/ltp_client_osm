@@ -65,4 +65,52 @@
     <string name="bt_signin">Login</string>
     <string name="bt_close">Close</string>
     <string name="title_choose_action">Choose an action</string>
+    
+    <string name="langue">Language</string>
+    <string name="france">French</string>
+    <string name="persan">Persian</string>
+    <string name="english">English</string>
+    <string name="YourLocationis">Your Location is </string>
+    <string name="salut">Hello:</string>    
+	<string name="txtUStat">Hello, Stranger login!</string>
+	<string name="lat">Lat:</string>
+	<string name="lon">long</string>
+	<string name="longg">, Long:</string>
+	<string name="Yourcurrent">Your current position has not been found!</string>
+	<string name=" Teslocalis">You are located: </string>
+	<string name="nomdutilisateur">Le nom dutilisateur est requis !</string>
+	<string name="votrenom">Your username must be at least 3 characters !</string>
+	<string name="votremot"> Your password must be at least 6 characters</string>
+    <string name="unmot">A password is required</string>
+    <string name="vefrication">Checking your password is required!</string>
+    <string name="nonvefrication">Password verification is not identical</string>
+    <string name="impossible">Can not published your status </string>
+    <string name="statusmi">Update stuatus</string>
+    <string name="search">Search</string>
+    <string name="title">Title</string>
+    <string name="description">Description</string>
+    <string name="address">Address</string>
+    <string name="instructions">Instructions</string>
+    <string name="distanceduration">Distance/Duration</string>
+    <string name="Itinerary">Itinerary</string>
+    <string name="info">Your informations</string>
+   	<string name="recherchesurlacarte">Search on the map</string>
+    <string name="poi_list">Point of Interest</string>
+    <string name="balisMes">&lt;Message></string>
+  	<string name="yourloca">Your Location is - </string>
+  	<string name="publier">Publish my status</string>
+  	<string name="statuss">Publish my status for my friends</string>
+  	
+  	<string name="aff">Display</string>
+  	<string name="aff_position">Send my position</string>
+	<string name="aff_envoie_serveur_not">Don\'t send my position to the server</string>
+	<string name="aff_envoie_serveur">Send my position to the server</string>
+  	
+  	<string name="affichage">Affichage</string>    
+    <string name="afficherlaminimap">Afficher la mini map</string>
+    <string name="noafficherlaminimap">Désactiver la mini carte (recommandé si petit écran ou mobile peu performant)."</string>       
+    <string name="afficheruneminicartepourplusdeprcision">Afficher une mini carte pour plus de précision.</string>
+    <string name="affichercranaccueil">Afficher l\'écran d\'accueil</string>
+    <string name="nplafficher">Ne plus afficher vos informations a chaque démarrage de l\'application</string>
+    <string name="afficherchaquemarragepplicatioinformations">Afficher a chaque démarrage de l\'application vos dérnières informations.</string>
 </resources>
