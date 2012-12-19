@@ -1321,11 +1321,12 @@ containing a value of this type.
     public static final class string {
         public static final int  Teslocalis=0x7f0b0052;
         public static final int Itinerary=0x7f0b0060;
-        public static final int Quevoulezvousfaire=0x7f0b0073;
-        public static final int Sedeonnecter=0x7f0b0074;
-        public static final int VosInformations=0x7f0b0078;
+        public static final int Quevoulezvousfaire=0x7f0b0087;
+        public static final int Sedeonnecter=0x7f0b0088;
+        public static final int VosInformations=0x7f0b0075;
         public static final int YourLocationis=0x7f0b004b;
         public static final int Yourcurrent=0x7f0b0051;
+        public static final int _textViewUserStatus=0x7f0b0079;
         public static final int about=0x7f0b002b;
         /**  Content description for the action bar "home" affordance. [CHAR LIMIT=NONE] 
          */
@@ -1372,7 +1373,7 @@ containing a value of this type.
         /**  Description of a share target (both in the list of such or the default share button) in a ShareActionProvider (share UI). [CHAR LIMIT=NONE] 
          */
         public static final int abs__shareactionprovider_share_with_application=0x7f0b0009;
-        public static final int activity_main=0x7f0b0079;
+        public static final int activity_main=0x7f0b0077;
         public static final int address=0x7f0b005d;
         public static final int aff=0x7f0b0067;
         public static final int aff_envoie_serveur=0x7f0b006a;
@@ -1391,10 +1392,10 @@ containing a value of this type.
         public static final int bt_close=0x7f0b0045;
         public static final int bt_signin=0x7f0b0044;
         public static final int bt_signup=0x7f0b0043;
-        public static final int btnLogin=0x7f0b007c;
+        public static final int btnLogin=0x7f0b007a;
         public static final int cancel=0x7f0b0014;
-        public static final int close=0x7f0b007b;
-        public static final int coordonnes=0x7f0b0077;
+        public static final int close=0x7f0b0089;
+        public static final int coordonnes=0x7f0b0074;
         public static final int departure=0x7f0b0032;
         public static final int description=0x7f0b005c;
         public static final int destination=0x7f0b0033;
@@ -1402,11 +1403,13 @@ containing a value of this type.
         public static final int distanceduration=0x7f0b005f;
         public static final int email=0x7f0b001a;
         public static final int english=0x7f0b004a;
-        public static final int fermer=0x7f0b0081;
+        public static final int fermer=0x7f0b0082;
         public static final int france=0x7f0b0048;
+        public static final int hello_world=0x7f0b0076;
         public static final int history_status=0x7f0b003e;
         public static final int impossible=0x7f0b0059;
         public static final int info=0x7f0b0061;
+        public static final int inscrir=0x7f0b0080;
         public static final int instructions=0x7f0b005e;
         public static final int itinerary=0x7f0b003c;
         public static final int langue=0x7f0b0047;
@@ -1418,11 +1421,12 @@ containing a value of this type.
         public static final int logout=0x7f0b0023;
         public static final int lon=0x7f0b004f;
         public static final int longg=0x7f0b0050;
-        public static final int menuExit=0x7f0b007a;
+        public static final int menuExit=0x7f0b0078;
         public static final int menu_settings=0x7f0b0031;
         public static final int msg_accueil=0x7f0b000f;
         public static final int my_account=0x7f0b0026;
         public static final int noafficherlaminimap=0x7f0b006d;
+        public static final int nolocfoun=0x7f0b0083;
         public static final int nomdutilisateur=0x7f0b0053;
         public static final int nonvefrication=0x7f0b0058;
         public static final int nplafficher=0x7f0b0070;
@@ -1430,7 +1434,7 @@ containing a value of this type.
         public static final int password_check=0x7f0b0019;
         public static final int persan=0x7f0b0049;
         public static final int poi_list=0x7f0b003d;
-        public static final int pointi=0x7f0b0082;
+        public static final int pointi=0x7f0b0086;
         public static final int prefs_update_error=0x7f0b002e;
         public static final int publier=0x7f0b0065;
         public static final int publish_status=0x7f0b0021;
@@ -1440,7 +1444,7 @@ containing a value of this type.
         public static final int salut=0x7f0b004c;
         public static final int search=0x7f0b0042;
         public static final int search_on_map=0x7f0b002a;
-        public static final int secoonecter=0x7f0b0080;
+        public static final int secoonecter=0x7f0b0081;
         public static final int settings=0x7f0b0013;
         public static final int signin=0x7f0b0025;
         public static final int signup=0x7f0b0024;
@@ -1454,8 +1458,9 @@ containing a value of this type.
         public static final int submit=0x7f0b0041;
         public static final int submit_login=0x7f0b001c;
         public static final int submit_signup=0x7f0b001b;
-        public static final int texEmail=0x7f0b007e;
-        public static final int texPassword=0x7f0b007d;
+        public static final int texEmail=0x7f0b007c;
+        public static final int texPassword=0x7f0b007b;
+        public static final int textViewConnexion=0x7f0b007d;
         public static final int title=0x7f0b005b;
         public static final int title_activity_main=0x7f0b0011;
         public static final int title_choose_action=0x7f0b0046;
@@ -1472,13 +1477,15 @@ containing a value of this type.
         public static final int user_app_settings=0x7f0b0028;
         public static final int vefrication=0x7f0b0057;
         public static final int via_point=0x7f0b0034;
-        public static final int via_points=0x7f0b0072;
+        public static final int via_points=0x7f0b0085;
+        public static final int votreLangue=0x7f0b007e;
         public static final int votremot=0x7f0b0055;
         public static final int votrenom=0x7f0b0054;
         public static final int voulezfaire=0x7f0b007f;
         public static final int welcome_msg=0x7f0b0020;
-        public static final int x=0x7f0b0076;
-        public static final int y=0x7f0b0075;
+        public static final int x=0x7f0b0073;
+        public static final int y=0x7f0b0072;
+        public static final int yourcurrentpos=0x7f0b0084;
         public static final int yourloca=0x7f0b0064;
     }
     public static final class style {
