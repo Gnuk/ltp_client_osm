@@ -424,7 +424,7 @@ public class MainActivity extends SherlockActivity implements MapEventsReceiver,
 			getPopup().popupPublishStatus(); 
 			break;
 			
-		// Liste des dérniers status
+		// Liste des derniers status
 		case 14:
 			// Récupérer la liste des amis via appel serveur REST
 			getSession().getJSON("https://jibiki.univ-savoie.fr/ltpdev/rest.php/api/1/statuses", "STATUSES");
