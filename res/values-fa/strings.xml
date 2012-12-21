@@ -114,4 +114,6 @@
     <string name="affichercranaccueil">نمایش خانه</string>
     <string name="nplafficher">اطلاعات را با هر بار وارد شدن نمایش ندهد</string>
     <string name="afficherchaquemarragepplicatioinformations">اطلاعات را با هر بار وارد شدن نمایش  دهد</string>   
+
+	<string name="history_status">تاریخچه وضعیت</string>
 </resources>
